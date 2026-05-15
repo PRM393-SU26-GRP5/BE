@@ -1,0 +1,41 @@
+# Visual Studio cache/options directory
+.vs
+
+# Compiled outputs
+bin/
+obj/
+*.dll
+*.exe
+*.out
+*.app
+*.pdb
+
+# Visual Studio user-specific files
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Environment configuration and secrets
+appsettings.json
+appsettings.*.json
+secrets.json
+.env
+.env.*
+
+# JetBrains Rider / IntelliJ
+.idea/
+*.sln.iml
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

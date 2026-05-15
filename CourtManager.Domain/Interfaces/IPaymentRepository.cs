@@ -1,0 +1,12 @@
+using CourtManager.Domain.Entities;
+
+namespace CourtManager.Domain.Interfaces;
+
+/// <summary>
+/// Repository interface for Payment entity with specific queries.
+/// </summary>
+public interface IPaymentRepository : IRepository<Payment>
+{
+    Task<Payment?> GetByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default);
+    Task<Payment?> GetByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default);
+}

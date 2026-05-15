@@ -1,0 +1,211 @@
+using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using CourtManager.Application.DTOs;
+using CourtManager.Application.Features.Auth.Commands;
+using System.Security.Claims;
+
+namespace CourtManager.APIs.Controllers;
+
+/// <summary>
+/// Controller for user authentication endpoints (register, login, refresh token).
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    public AuthController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    /// <summary>
+    /// Register a new user account.
+    /// </summary>
+    [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterRequestDto request)
+    {
+        var command = new RegisterCommand
+        {
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
+            Password = request.Password,
+            ConfirmPassword = request.ConfirmPassword
+        };
+
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Login user and return access and refresh tokens.
+    /// </summary>
+    [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto request)
+    {
+        var command = new LoginCommand
+        {
+            Email = request.Email,
+            Password = request.Password
+        };
+
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+        {
+            return Unauthorized(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Refresh access token using refresh token.
+    /// </summary>
+    [HttpPost("refresh-token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto request)
+    {
+        // Get the access token from Authorization header
+        var authHeader = Request.Headers["Authorization"].ToString();
+        var accessToken = authHeader.StartsWith("Bearer ") ? authHeader.Substring("Bearer ".Length) : string.Empty;
+
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return BadRequest(new AuthResponseDto
+            {
+                Success = false,
+                Message = "Access token is required"
+            });
+        }
+
+        var command = new RefreshTokenCommand
+        {
+            AccessToken = accessToken,
+            RefreshToken = request.RefreshToken
+        };
+
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+        {
+            return Unauthorized(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Logout user by revoking refresh token.
+    /// </summary>
+    [HttpPost("logout")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponseDto>> Logout()
+    {
+        var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized(new AuthResponseDto { Success = false, Message = "Invalid token claims" });
+        }
+
+        var command = new LogoutCommand { UserId = userId };
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Change current user's password.
+    /// </summary>
+    [HttpPost("change-password")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponseDto>> ChangePassword([FromBody] ChangePasswordRequestDto request)
+    {
+        if (request.NewPassword != request.ConfirmNewPassword)
+        {
+            return BadRequest(new AuthResponseDto { Success = false, Message = "New passwords do not match" });
+        }
+
+        var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized(new AuthResponseDto { Success = false, Message = "Invalid token claims" });
+        }
+
+        var command = new ChangePasswordCommand
+        {
+            UserId = userId,
+            CurrentPassword = request.CurrentPassword,
+            NewPassword = request.NewPassword
+        };
+
+        var result = await _mediator.Send(command);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Request a password reset token.
+    /// </summary>
+    [HttpPost("forgot-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
+    {
+        var command = new ForgotPasswordCommand { Email = request.Email };
+        var result = await _mediator.Send(command);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Reset password using a reset token.
+    /// </summary>
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponseDto>> ResetPassword([FromBody] ResetPasswordRequestDto request)
+    {
+        if (request.NewPassword != request.ConfirmNewPassword)
+        {
+            return BadRequest(new AuthResponseDto { Success = false, Message = "New passwords do not match" });
+        }
+
+        var command = new ResetPasswordCommand
+        {
+            Email = request.Email,
+            Token = request.Token,
+            NewPassword = request.NewPassword
+        };
+
+        var result = await _mediator.Send(command);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
+}

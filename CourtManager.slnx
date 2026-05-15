@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CourtManager.Application/CourtManager.Application.csproj" />
+  <Project Path="CourtManager.Domain/CourtManager.Domain.csproj" />
+  <Project Path="CourtManager.Infrastructure/CourtManager.Infrastructure.csproj" />
+  <Project Path="CourtManager.APIs/CourtManager.APIs.csproj" />
+</Solution>
