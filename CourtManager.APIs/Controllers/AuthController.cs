@@ -28,12 +28,17 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterRequestDto request)
     {
+        if (request.Password != request.ConfirmPassword)
+        {
+            return BadRequest(new AuthResponseDto { Success = false, Message = "Passwords do not match" });
+        }
+
         var command = new RegisterCommand
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
+            PhoneNumber = request.PhoneNumber.ToString(),
             Password = request.Password,
             ConfirmPassword = request.ConfirmPassword
         };

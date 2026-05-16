@@ -23,7 +23,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("Phone number is required")
-            .Matches(@"^\+?[1-9]\d{1,14}$").WithMessage("Phone number must be valid");
+            .Matches(@"^\d{8,12}$").WithMessage("Phone number must be valid");
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required")

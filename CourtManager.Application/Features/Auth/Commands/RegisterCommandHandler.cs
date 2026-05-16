@@ -90,7 +90,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email!,
-                PhoneNumber = user.PhoneNumber ?? ""
+                PhoneNumber = int.TryParse(user.PhoneNumber, out var phoneNumber) ? phoneNumber : 0
             },
             ExpiresIn = DateTime.UtcNow.AddMinutes(60) // Access token expiry
         };
