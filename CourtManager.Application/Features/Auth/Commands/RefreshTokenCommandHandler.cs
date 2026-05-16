@@ -86,7 +86,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
 
         // Generate tokens
         var newAccessToken = _jwtTokenService.GenerateAccessToken(user, roles);
-        var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+        var newRefreshToken = _jwtTokenService.GenerateRefreshTokenJwt(user, roles);
         var newRefreshTokenExpiryTime = _jwtTokenService.GetRefreshTokenExpiryTime();
 
         // Update user's refresh token

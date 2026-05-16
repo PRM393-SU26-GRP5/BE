@@ -82,7 +82,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
 
         // Generate tokens
         var accessToken = _jwtTokenService.GenerateAccessToken(user, roles);
-        var refreshToken = _jwtTokenService.GenerateRefreshToken();
+        var refreshToken = _jwtTokenService.GenerateRefreshTokenJwt(user, roles);
         var refreshTokenExpiryTime = _jwtTokenService.GetRefreshTokenExpiryTime();
 
         user.RefreshToken = refreshToken;

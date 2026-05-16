@@ -16,9 +16,9 @@ public interface IJwtTokenService
     string GenerateAccessToken(User user, IList<string> roles);
 
     /// <summary>
-    /// Generates a refresh token (random string).
+    /// Generates a JWT refresh token for the specified user.
     /// </summary>
-    string GenerateRefreshToken();
+    string GenerateRefreshTokenJwt(User user, IList<string> roles);
 
     /// <summary>
     /// Gets the expiry time for a refresh token based on configuration.
@@ -91,21 +91,39 @@ public class JwtTokenService : IJwtTokenService
     }
 
     /// <summary>
-    /// Generates a random refresh token.
+    /// Generates a JWT refresh token for the specified user.
     /// </summary>
-    public string GenerateRefreshToken()
+    public string GenerateRefreshTokenJwt(User user, IList<string> roles)
     {
-        var randomNumber = new byte[128]; 
-        using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+        var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_secret));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new List<Claim>
         {
-            rng.GetBytes(randomNumber);
-            var base64String = Convert.ToBase64String(randomNumber)
-                .Replace("+", "-")
-                .Replace("/", "_")
-                .TrimEnd('=');
-                
-            return $"{Guid.NewGuid():N}.{base64String}";
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
+            new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty),
+            new Claim("token_type", "refresh")
+        };
+
+        if (roles != null)
+        {
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
         }
+
+        var token = new JwtSecurityToken(
+            issuer: _issuer,
+            audience: _audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(_refreshTokenExpirationInDays),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     /// <summary>
