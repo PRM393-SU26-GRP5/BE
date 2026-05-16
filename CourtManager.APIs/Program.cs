@@ -171,7 +171,7 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<CourtManager.Infrastructure.ApplicationDbContext>();
-        dbContext.Database.EnsureCreated(); // Creates database if it doesn't exist
+        // dbContext.Database.EnsureCreated(); // Creates database if it doesn't exist
     }
 
     app.Run();
