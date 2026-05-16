@@ -52,44 +52,60 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
     /// </summary>
     private static void SeedData(ModelBuilder modelBuilder)
     {
-        // Seed Users - Use fixed GUIDs
-        var userId1 = new Guid("20000000-0000-0000-0000-000000000001");
-        var userId2 = new Guid("20000000-0000-0000-0000-000000000002");
+        // Hardcoded password hash for "Password@123" to avoid EF Core dynamic model change warnings
+        var defaultPasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==";
 
-        modelBuilder.Entity<User>().HasData(
-            new User
+        // Role GUIDs from RoleConfiguration
+        var adminRoleId = new Guid("10000000-0000-0000-0000-000000000001");
+        var managerRoleId = new Guid("10000000-0000-0000-0000-000000000002");
+        var playerRoleId = new Guid("10000000-0000-0000-0000-000000000003");
+
+        var users = new List<User>();
+        var userRoles = new List<UserRole>();
+
+        var accountData = new[]
+        {
+            new { Id = new Guid("20000000-0000-0000-0000-000000000001"), Role = adminRoleId, FirstName = "System", LastName = "Admin1", Email = "admin1@court.com", Phone = "0900000001" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000002"), Role = adminRoleId, FirstName = "System", LastName = "Admin2", Email = "admin2@court.com", Phone = "0900000002" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000003"), Role = managerRoleId, FirstName = "Court", LastName = "Manager1", Email = "manager1@court.com", Phone = "0900000003" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000004"), Role = managerRoleId, FirstName = "Court", LastName = "Manager2", Email = "manager2@court.com", Phone = "0900000004" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000005"), Role = managerRoleId, FirstName = "Court", LastName = "Manager3", Email = "manager3@court.com", Phone = "0900000005" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000006"), Role = playerRoleId, FirstName = "Pro", LastName = "Player1", Email = "player1@court.com", Phone = "0900000006" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000007"), Role = playerRoleId, FirstName = "Pro", LastName = "Player2", Email = "player2@court.com", Phone = "0900000007" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000008"), Role = playerRoleId, FirstName = "Casual", LastName = "Player3", Email = "player3@court.com", Phone = "0900000008" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000009"), Role = playerRoleId, FirstName = "Casual", LastName = "Player4", Email = "player4@court.com", Phone = "0900000009" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000010"), Role = playerRoleId, FirstName = "Newbie", LastName = "Player5", Email = "player5@court.com", Phone = "0900000010" }
+        };
+
+        foreach (var data in accountData)
+        {
+            users.Add(new User
             {
-                Id = userId1,
-                FirstName = "John",
-                LastName = "Doe",
-                UserName = "john.doe@example.com",
-                NormalizedUserName = "JOHN.DOE@EXAMPLE.COM",
-                Email = "john.doe@example.com",
-                NormalizedEmail = "JOHN.DOE@EXAMPLE.COM",
-                PhoneNumber = "+1234567890",
-                PasswordHash = string.Empty,
+                Id = data.Id,
+                FirstName = data.FirstName,
+                LastName = data.LastName,
+                UserName = data.Email,
+                NormalizedUserName = data.Email.ToUpper(),
+                Email = data.Email,
+                NormalizedEmail = data.Email.ToUpper(),
+                PhoneNumber = data.Phone,
+                PasswordHash = defaultPasswordHash,
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 IsActive = true,
-                ConcurrencyStamp = "20000000-0000-0000-0000-000000000001",
-                SecurityStamp = "20000000-0000-0000-0000-000000000001"
-            },
-            new User
+                ConcurrencyStamp = data.Id.ToString(),
+                SecurityStamp = data.Id.ToString()
+            });
+
+            userRoles.Add(new UserRole
             {
-                Id = userId2,
-                FirstName = "Jane",
-                LastName = "Smith",
-                UserName = "jane.smith@example.com",
-                NormalizedUserName = "JANE.SMITH@EXAMPLE.COM",
-                Email = "jane.smith@example.com",
-                NormalizedEmail = "JANE.SMITH@EXAMPLE.COM",
-                PhoneNumber = "+0987654321",
-                PasswordHash = string.Empty,
-                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsActive = true,
-                ConcurrencyStamp = "20000000-0000-0000-0000-000000000002",
-                SecurityStamp = "20000000-0000-0000-0000-000000000002"
-            }
-        );
+                UserId = data.Id,
+                RoleId = data.Role,
+                AssignedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            });
+        }
+
+        modelBuilder.Entity<User>().HasData(users);
+        modelBuilder.Entity<UserRole>().HasData(userRoles);
 
         // Seed Courts - Use fixed GUIDs
         var courtId1 = new Guid("30000000-0000-0000-0000-000000000001");

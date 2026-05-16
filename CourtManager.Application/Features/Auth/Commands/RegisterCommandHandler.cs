@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using CourtManager.Application.DTOs;
 using CourtManager.Application.Services;
 using CourtManager.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CourtManager.Application.Features.Auth.Commands;
 
@@ -35,6 +36,17 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             {
                 Success = false,
                 Message = "User with this email already exists"
+            };
+        }
+
+        // Check if phone number already exists
+        var phoneExists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == request.PhoneNumber, cancellationToken);
+        if (phoneExists)
+        {
+            return new AuthResponseDto
+            {
+                Success = false,
+                Message = "User with this phone number already exists"
             };
         }
 
@@ -90,7 +102,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email!,
-                PhoneNumber = int.TryParse(user.PhoneNumber, out var phoneNumber) ? phoneNumber : 0
+                PhoneNumber = user.PhoneNumber ?? string.Empty
             },
             ExpiresIn = DateTime.UtcNow.AddMinutes(60) // Access token expiry
         };

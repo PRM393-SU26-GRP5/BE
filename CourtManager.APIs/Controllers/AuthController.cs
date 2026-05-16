@@ -38,7 +38,7 @@ public class AuthController : ControllerBase
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
-            PhoneNumber = request.PhoneNumber.ToString(),
+            PhoneNumber = request.PhoneNumber,
             Password = request.Password,
             ConfirmPassword = request.ConfirmPassword
         };
