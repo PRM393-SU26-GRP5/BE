@@ -40,7 +40,6 @@ public class AuthResponseDto
     public string? AccessToken { get; set; }
     public string? RefreshToken { get; set; }
     public UserAuthDto? User { get; set; }
-    public DateTime? ExpiresIn { get; set; }
 }
 
 /// <summary>

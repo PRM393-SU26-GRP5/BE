@@ -109,8 +109,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
                 LastName = user.LastName,
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber ?? string.Empty
-            },
-            ExpiresIn = DateTime.UtcNow.AddMinutes(60) // Access token expiry
+            }
         };
     }
 }

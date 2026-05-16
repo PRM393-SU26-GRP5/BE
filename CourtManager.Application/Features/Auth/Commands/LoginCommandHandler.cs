@@ -86,8 +86,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto
                 LastName = user.LastName,
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber ?? string.Empty
-            },
-            ExpiresIn = DateTime.UtcNow.AddMinutes(60) // Access token expiry
+            }
         };
     }
 }
