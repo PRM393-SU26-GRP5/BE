@@ -18,9 +18,9 @@ public class PaymentRepository : Repository<Payment>, IPaymentRepository
             .FirstOrDefaultAsync(p => p.BookingId == bookingId, cancellationToken);
     }
 
-    public async Task<Payment?> GetByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default)
+    public async Task<Payment?> GetByTransactionIdAsync(string transactionCode, CancellationToken cancellationToken = default)
     {
         return await _dbSet
-            .FirstOrDefaultAsync(p => p.TransactionId == transactionId, cancellationToken);
+            .FirstOrDefaultAsync(p => p.TransactionCode == transactionCode, cancellationToken);
     }
 }

@@ -14,8 +14,8 @@ public class MappingProfile : Profile
         // User mappings
         CreateMap<User, UserDto>().ReverseMap();
 
-        // Court mappings
-        CreateMap<Court, CourtDto>().ReverseMap();
+        // FootballField mappings
+        CreateMap<FootballField, FootballFieldDto>().ReverseMap();
 
         // Booking mappings
         CreateMap<Booking, BookingDto>().ReverseMap();

@@ -20,22 +20,22 @@ public class BookingRepository : Repository<Booking>, IBookingRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Booking>> GetBookingsByCourtIdAsync(Guid courtId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Booking>> GetBookingsByCourtIdAsync(Guid fieldId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
-            .Where(b => b.CourtId == courtId)
+            .Where(b => b.FieldId == fieldId)
             .OrderByDescending(b => b.StartTime)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> IsCourtAvailableAsync(
-        Guid courtId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
+        Guid fieldId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken = default)
     {
         // Check if there are any confirmed or pending bookings that overlap with the requested time
         var hasConflict = await _dbSet
             .AnyAsync(b =>
-                b.CourtId == courtId &&
-                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending) &&
+                b.FieldId == fieldId &&
+                (b.BookingStatus == "Confirmed" || b.BookingStatus == "Pending") &&
                 b.StartTime < endTime && b.EndTime > startTime,
                 cancellationToken);
 

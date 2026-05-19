@@ -65,8 +65,7 @@ public class JwtTokenService : IJwtTokenService
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-            new Claim(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
-            new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty),
+            new Claim(ClaimTypes.Name, user.FullName ?? string.Empty),
             new Claim("PhoneNumber", user.PhoneNumber ?? string.Empty)
         };
 
@@ -102,8 +101,7 @@ public class JwtTokenService : IJwtTokenService
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-            new Claim(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
-            new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty),
+            new Claim(ClaimTypes.Name, user.FullName ?? string.Empty),
             new Claim("token_type", "refresh")
         };
 

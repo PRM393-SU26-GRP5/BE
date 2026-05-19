@@ -14,26 +14,26 @@ namespace CourtManager.Application.Features.Bookings.Commands;
 public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand, BookingDto>
 {
     private readonly IUserRepository _userRepository;
-    private readonly ICourtRepository _courtRepository;
+    private readonly IFootballFieldRepository _fieldRepository;
     private readonly IBookingRepository _bookingRepository;
     private readonly IMapper _mapper;
 
     public CreateBookingCommandHandler(
         IUserRepository userRepository,
-        ICourtRepository courtRepository,
+        IFootballFieldRepository fieldRepository,
         IBookingRepository bookingRepository,
         IMapper mapper)
     {
         _userRepository = userRepository;
-        _courtRepository = courtRepository;
+        _fieldRepository = fieldRepository;
         _bookingRepository = bookingRepository;
         _mapper = mapper;
     }
 
     /// <summary>
     /// Handles the CreateBookingCommand.
-    /// Validates user and court existence, checks court availability,
-    /// calculates total amount, and creates the booking.
+    /// Validates user and field existence, checks field availability,
+    /// calculates total price, and creates the booking.
     /// </summary>
     public async Task<BookingDto> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
@@ -42,33 +42,33 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         if (user == null)
             throw new NotFoundException(nameof(User), request.UserId);
 
-        // Validate court exists
-        var court = await _courtRepository.GetByIdAsync(request.CourtId, cancellationToken);
-        if (court == null)
-            throw new NotFoundException(nameof(Court), request.CourtId);
+        // Validate football field exists
+        var field = await _fieldRepository.GetByIdAsync(request.FieldId, cancellationToken);
+        if (field == null)
+            throw new NotFoundException(nameof(FootballField), request.FieldId);
 
-        // Check court availability
+        // Check field availability
         var isAvailable = await _bookingRepository.IsCourtAvailableAsync(
-            request.CourtId, request.StartTime, request.EndTime, cancellationToken);
+            request.FieldId, request.StartTime, request.EndTime, cancellationToken);
 
         if (!isAvailable)
             throw new ValidationException(
-                $"Court '{court.Name}' is not available for the specified time period.");
+                $"Field '{field.FieldName}' is not available for the specified time period.");
 
-        // Calculate total amount (hours * price per hour)
+        // Calculate total price (hours * price per hour)
         var durationInHours = (decimal)(request.EndTime - request.StartTime).TotalHours;
-        var totalAmount = durationInHours * court.PricePerHour;
+        var totalPrice = durationInHours * field.PricePerHour;
 
         // Create booking entity
         var booking = new Booking
         {
             Id = Guid.NewGuid(),
             UserId = request.UserId,
-            CourtId = request.CourtId,
+            FieldId = request.FieldId,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
-            TotalAmount = totalAmount,
-            Status = BookingStatus.Pending,
+            TotalPrice = totalPrice,
+            BookingStatus = "Pending",
             CreatedAt = DateTime.UtcNow
         };
 

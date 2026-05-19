@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CourtManager.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260516084847_UpdateSeedDataAccounts")]
-    partial class UpdateSeedDataAccounts
+    [Migration("20260519045141_InitialDatabaseSchema")]
+    partial class InitialDatabaseSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,8 +30,12 @@ namespace CourtManager.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CourtId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("BookingStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -41,15 +45,17 @@ namespace CourtManager.Infrastructure.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("FieldId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<decimal>("TotalAmount")
+                    b.Property<decimal>("TotalPrice")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
@@ -61,16 +67,93 @@ namespace CourtManager.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourtId");
+                    b.HasIndex("FieldId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("CourtId", "StartTime", "EndTime");
+                    b.HasIndex("FieldId", "StartTime", "EndTime");
 
                     b.ToTable("Bookings", (string)null);
                 });
 
-            modelBuilder.Entity("CourtManager.Domain.Entities.Court", b =>
+            modelBuilder.Entity("CourtManager.Domain.Entities.BookingItem", b =>
+                {
+                    b.Property<Guid>("BookingItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid>("SlotId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BookingItemId");
+
+                    b.HasIndex("SlotId");
+
+                    b.HasIndex("BookingId", "SlotId");
+
+                    b.ToTable("BookingItems", (string)null);
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.ChatRoom", b =>
+                {
+                    b.Property<Guid>("RoomId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RoomId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("HostId");
+
+                    b.ToTable("ChatRooms", (string)null);
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.FieldImage", b =>
+                {
+                    b.Property<Guid>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FieldId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("ImageId");
+
+                    b.HasIndex("FieldId");
+
+                    b.ToTable("FieldImages", (string)null);
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.FootballField", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -85,20 +168,36 @@ namespace CourtManager.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<bool>("IsAvailable")
+                    b.Property<string>("FieldName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("FieldType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<decimal>("Latitude")
+                        .HasPrecision(10, 7)
+                        .HasColumnType("decimal(10,7)");
 
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<decimal>("Longitude")
+                        .HasPrecision(10, 7)
+                        .HasColumnType("decimal(10,7)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("PricePerHour")
                         .HasPrecision(10, 2)
@@ -109,29 +208,76 @@ namespace CourtManager.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courts", (string)null);
+                    b.HasIndex("OwnerId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Professional basketball court",
-                            IsAvailable = true,
-                            Location = "Downtown Sports Complex",
-                            Name = "Court 1 - Basketball",
-                            PricePerHour = 50.00m
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Outdoor tennis court",
-                            IsAvailable = true,
-                            Location = "Central Park",
-                            Name = "Court 2 - Tennis",
-                            PricePerHour = 40.00m
-                        });
+                    b.ToTable("FootballFields", (string)null);
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MessageText")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("RoomId", "SentAt");
+
+                    b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("CourtManager.Domain.Entities.Payment", b =>
@@ -146,32 +292,71 @@ namespace CourtManager.Infrastructure.Migrations
                     b.Property<Guid>("BookingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("PaymentDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
 
-                    b.Property<string>("TransactionId")
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TransactionCode")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookingId")
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("TransactionCode")
                         .IsUnique();
 
-                    b.HasIndex("TransactionId");
-
                     b.ToTable("Payments", (string)null);
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.Review", b =>
+                {
+                    b.Property<Guid>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("FieldId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("FieldId");
+
+                    b.HasIndex("UserId", "FieldId")
+                        .IsUnique();
+
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("CourtManager.Domain.Entities.Role", b =>
@@ -241,6 +426,43 @@ namespace CourtManager.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CourtManager.Domain.Entities.TimeSlot", b =>
+                {
+                    b.Property<Guid>("SlotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FieldId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SlotStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Available");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SlotId");
+
+                    b.HasIndex("FieldId", "StartTime", "EndTime");
+
+                    b.ToTable("TimeSlots", (string)null);
+                });
+
             modelBuilder.Entity("CourtManager.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -249,6 +471,9 @@ namespace CourtManager.Infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -266,26 +491,26 @@ namespace CourtManager.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("LoyaltyPoints")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -297,6 +522,11 @@ namespace CourtManager.Infrastructure.Migrations
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
@@ -344,13 +574,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin1@court.com",
                             EmailConfirmed = false,
-                            FirstName = "System",
+                            FullName = "System Admin1",
                             IsActive = true,
-                            LastName = "Admin1",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "ADMIN1@COURT.COM",
                             NormalizedUserName = "ADMIN1@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000001",
                             PhoneNumber = "0900000001",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000001",
@@ -365,13 +596,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "admin2@court.com",
                             EmailConfirmed = false,
-                            FirstName = "System",
+                            FullName = "System Admin2",
                             IsActive = true,
-                            LastName = "Admin2",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "ADMIN2@COURT.COM",
                             NormalizedUserName = "ADMIN2@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000002",
                             PhoneNumber = "0900000002",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000002",
@@ -386,13 +618,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "manager1@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Court",
+                            FullName = "Court Manager1",
                             IsActive = true,
-                            LastName = "Manager1",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "MANAGER1@COURT.COM",
                             NormalizedUserName = "MANAGER1@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000003",
                             PhoneNumber = "0900000003",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000003",
@@ -407,13 +640,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "manager2@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Court",
+                            FullName = "Court Manager2",
                             IsActive = true,
-                            LastName = "Manager2",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "MANAGER2@COURT.COM",
                             NormalizedUserName = "MANAGER2@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000004",
                             PhoneNumber = "0900000004",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000004",
@@ -428,13 +662,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "manager3@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Court",
+                            FullName = "Court Manager3",
                             IsActive = true,
-                            LastName = "Manager3",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "MANAGER3@COURT.COM",
                             NormalizedUserName = "MANAGER3@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000005",
                             PhoneNumber = "0900000005",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000005",
@@ -449,13 +684,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "player1@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Pro",
+                            FullName = "Pro Player1",
                             IsActive = true,
-                            LastName = "Player1",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER1@COURT.COM",
                             NormalizedUserName = "PLAYER1@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000006",
                             PhoneNumber = "0900000006",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000006",
@@ -470,13 +706,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "player2@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Pro",
+                            FullName = "Pro Player2",
                             IsActive = true,
-                            LastName = "Player2",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER2@COURT.COM",
                             NormalizedUserName = "PLAYER2@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000007",
                             PhoneNumber = "0900000007",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000007",
@@ -491,13 +728,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "player3@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Casual",
+                            FullName = "Casual Player3",
                             IsActive = true,
-                            LastName = "Player3",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER3@COURT.COM",
                             NormalizedUserName = "PLAYER3@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000008",
                             PhoneNumber = "0900000008",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000008",
@@ -512,13 +750,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "player4@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Casual",
+                            FullName = "Casual Player4",
                             IsActive = true,
-                            LastName = "Player4",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER4@COURT.COM",
                             NormalizedUserName = "PLAYER4@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000009",
                             PhoneNumber = "0900000009",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000009",
@@ -533,13 +772,14 @@ namespace CourtManager.Infrastructure.Migrations
                             CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "player5@court.com",
                             EmailConfirmed = false,
-                            FirstName = "Newbie",
+                            FullName = "Newbie Player5",
                             IsActive = true,
-                            LastName = "Player5",
                             LockoutEnabled = false,
+                            LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER5@COURT.COM",
                             NormalizedUserName = "PLAYER5@COURT.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEMhNOhWJhrehCy84iiKMjD+gAwmKtd2V+CHm4EhzxmaTyXKW9OS5bmKjoFGKqWDFAg==",
+                            Phone = "0900000010",
                             PhoneNumber = "0900000010",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "20000000-0000-0000-0000-000000000010",
@@ -720,9 +960,9 @@ namespace CourtManager.Infrastructure.Migrations
 
             modelBuilder.Entity("CourtManager.Domain.Entities.Booking", b =>
                 {
-                    b.HasOne("CourtManager.Domain.Entities.Court", "Court")
+                    b.HasOne("CourtManager.Domain.Entities.FootballField", "Field")
                         .WithMany("Bookings")
-                        .HasForeignKey("CourtId")
+                        .HasForeignKey("FieldId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -732,7 +972,97 @@ namespace CourtManager.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Court");
+                    b.Navigation("Field");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.BookingItem", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.Booking", "Booking")
+                        .WithMany("BookingItems")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CourtManager.Domain.Entities.TimeSlot", "Slot")
+                        .WithMany("BookingItems")
+                        .HasForeignKey("SlotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Slot");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.ChatRoom", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.User", "Customer")
+                        .WithMany("CustomerChatRooms")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CourtManager.Domain.Entities.User", "Host")
+                        .WithMany("HostChatRooms")
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Host");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.FieldImage", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.FootballField", "Field")
+                        .WithMany("FieldImages")
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Field");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.FootballField", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.User", "Owner")
+                        .WithMany("OwnedFields")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.ChatRoom", "Room")
+                        .WithMany("Messages")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CourtManager.Domain.Entities.User", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -740,12 +1070,42 @@ namespace CourtManager.Infrastructure.Migrations
             modelBuilder.Entity("CourtManager.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("CourtManager.Domain.Entities.Booking", "Booking")
-                        .WithOne("Payment")
-                        .HasForeignKey("CourtManager.Domain.Entities.Payment", "BookingId")
+                        .WithMany("Payments")
+                        .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.Review", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.FootballField", "Field")
+                        .WithMany("Reviews")
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CourtManager.Domain.Entities.User", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Field");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.TimeSlot", b =>
+                {
+                    b.HasOne("CourtManager.Domain.Entities.FootballField", "Field")
+                        .WithMany("TimeSlots")
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Field");
                 });
 
             modelBuilder.Entity("CourtManager.Domain.Entities.UserRole", b =>
@@ -805,12 +1165,25 @@ namespace CourtManager.Infrastructure.Migrations
 
             modelBuilder.Entity("CourtManager.Domain.Entities.Booking", b =>
                 {
-                    b.Navigation("Payment");
+                    b.Navigation("BookingItems");
+
+                    b.Navigation("Payments");
                 });
 
-            modelBuilder.Entity("CourtManager.Domain.Entities.Court", b =>
+            modelBuilder.Entity("CourtManager.Domain.Entities.ChatRoom", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("CourtManager.Domain.Entities.FootballField", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("FieldImages");
+
+                    b.Navigation("Reviews");
+
+                    b.Navigation("TimeSlots");
                 });
 
             modelBuilder.Entity("CourtManager.Domain.Entities.Role", b =>
@@ -818,9 +1191,26 @@ namespace CourtManager.Infrastructure.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("CourtManager.Domain.Entities.TimeSlot", b =>
+                {
+                    b.Navigation("BookingItems");
+                });
+
             modelBuilder.Entity("CourtManager.Domain.Entities.User", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("CustomerChatRooms");
+
+                    b.Navigation("HostChatRooms");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("OwnedFields");
+
+                    b.Navigation("Reviews");
+
+                    b.Navigation("SentMessages");
 
                     b.Navigation("UserRoles");
                 });

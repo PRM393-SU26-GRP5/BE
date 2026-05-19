@@ -24,25 +24,35 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.Amount)
             .HasPrecision(10, 2);
 
-        builder.Property(p => p.Status)
-            .HasConversion<int>()
-            .HasDefaultValue(PaymentStatus.Pending);
+        builder.Property(p => p.PaymentType)
+            .IsRequired()
+            .HasMaxLength(50);
 
         builder.Property(p => p.PaymentMethod)
             .HasConversion<int>();
 
-        builder.Property(p => p.TransactionId)
+        builder.Property(p => p.PaymentStatus)
+            .IsRequired()
+            .HasDefaultValue("Pending")
+            .HasMaxLength(50);
+
+        builder.Property(p => p.TransactionCode)
+            .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(p => p.PaymentDate)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(p => p.PaidAt)
+            .IsRequired(false);
 
         // Indexes
-        builder.HasIndex(p => p.BookingId)
+        builder.HasIndex(p => p.BookingId);
+        builder.HasIndex(p => p.TransactionCode)
             .IsUnique();
 
-        builder.HasIndex(p => p.TransactionId);
+        // Foreign Keys
+        builder.HasOne(p => p.Booking)
+            .WithMany(b => b.Payments)
+            .HasForeignKey(p => p.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Table configuration
         builder.ToTable("Payments");

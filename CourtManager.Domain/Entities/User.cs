@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Identity;
 namespace CourtManager.Domain.Entities;
 
 /// <summary>
-/// Represents a user in the system (player or admin).
+/// Represents a user in the system (player, manager, or admin).
 /// </summary>
 public class User : IdentityUser<Guid>
 {
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string? AvatarUrl { get; set; }
+    public int LoyaltyPoints { get; set; } = 0;
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -18,4 +20,10 @@ public class User : IdentityUser<Guid>
     // Navigation properties
     public ICollection<Booking> Bookings { get; set; } = [];
     public virtual ICollection<UserRole> UserRoles { get; set; } = [];
+    public ICollection<FootballField> OwnedFields { get; set; } = [];
+    public ICollection<ChatRoom> CustomerChatRooms { get; set; } = [];
+    public ICollection<ChatRoom> HostChatRooms { get; set; } = [];
+    public ICollection<Message> SentMessages { get; set; } = [];
+    public ICollection<Notification> Notifications { get; set; } = [];
+    public ICollection<Review> Reviews { get; set; } = [];
 }

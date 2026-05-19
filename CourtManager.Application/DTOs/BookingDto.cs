@@ -1,5 +1,3 @@
-using CourtManager.Domain.Entities;
-
 namespace CourtManager.Application.DTOs;
 
 /// <summary>
@@ -9,11 +7,12 @@ public class BookingDto
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public Guid CourtId { get; set; }
+    public Guid FieldId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-    public decimal TotalAmount { get; set; }
-    public BookingStatus Status { get; set; }
+    public decimal TotalPrice { get; set; }
+    public string BookingStatus { get; set; } = string.Empty;
+    public string? Note { get; set; }
 }
 
 /// <summary>
@@ -22,7 +21,7 @@ public class BookingDto
 public class CreateBookingDto
 {
     public Guid UserId { get; set; }
-    public Guid CourtId { get; set; }
+    public Guid FieldId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
 }

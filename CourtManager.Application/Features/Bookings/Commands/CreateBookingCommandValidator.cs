@@ -14,9 +14,9 @@ public class CreateBookingCommandValidator : AbstractValidator<CreateBookingComm
             .NotEmpty()
             .WithMessage("User ID is required.");
 
-        RuleFor(x => x.CourtId)
+        RuleFor(x => x.FieldId)
             .NotEmpty()
-            .WithMessage("Court ID is required.");
+            .WithMessage("Field ID is required.");
 
         RuleFor(x => x.StartTime)
             .NotEmpty()

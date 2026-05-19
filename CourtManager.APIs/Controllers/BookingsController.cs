@@ -51,8 +51,8 @@ public class BookingsController : ControllerBase
         command.UserId = currentUserId;
 
         _logger.LogInformation(
-            "Creating booking for User: {UserId}, Court: {CourtId}",
-            command.UserId, command.CourtId);
+            "Creating booking for User: {UserId}, Field: {FieldId}",
+            command.UserId, command.FieldId);
 
         var result = await _mediator.Send(command, cancellationToken);
 

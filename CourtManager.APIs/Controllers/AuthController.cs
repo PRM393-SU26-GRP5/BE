@@ -35,8 +35,7 @@ public class AuthController : ControllerBase
 
         var command = new RegisterCommand
         {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
+            FullName = request.FullName,
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
             Password = request.Password,

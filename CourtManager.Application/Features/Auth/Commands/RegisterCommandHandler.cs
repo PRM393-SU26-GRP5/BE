@@ -55,8 +55,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
         {
             UserName = request.Email,
             Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
+            FullName = request.FullName,
+            Phone = request.PhoneNumber,
             PhoneNumber = request.PhoneNumber,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
@@ -99,8 +99,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             User = new UserAuthDto
             {
                 Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                FullName = user.FullName,
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber ?? string.Empty
             }

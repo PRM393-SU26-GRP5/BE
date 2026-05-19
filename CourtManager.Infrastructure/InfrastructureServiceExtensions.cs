@@ -43,7 +43,7 @@ public static class InfrastructureServiceExtensions
 
         // Register repositories
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ICourtRepository, CourtRepository>();
+        services.AddScoped<IFootballFieldRepository, FootballFieldRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
 

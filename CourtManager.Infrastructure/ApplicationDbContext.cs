@@ -16,9 +16,16 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
         : base(options) { }
 
     // DbSets for entities
-    public DbSet<Court> Courts => Set<Court>();
+    public DbSet<FootballField> FootballFields => Set<FootballField>();
+    public DbSet<FieldImage> FieldImages => Set<FieldImage>();
+    public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<BookingItem> BookingItems => Set<BookingItem>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<Review> Reviews => Set<Review>();
 
     /// <summary>
     /// Configures the model and applies all entity configurations.
@@ -37,9 +44,16 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
 
         // Apply all entity configurations
         modelBuilder.ApplyConfiguration(new UserConfiguration());
-        modelBuilder.ApplyConfiguration(new CourtConfiguration());
+        modelBuilder.ApplyConfiguration(new FootballFieldConfiguration());
+        modelBuilder.ApplyConfiguration(new FieldImageConfiguration());
+        modelBuilder.ApplyConfiguration(new TimeSlotConfiguration());
         modelBuilder.ApplyConfiguration(new BookingConfiguration());
+        modelBuilder.ApplyConfiguration(new BookingItemConfiguration());
         modelBuilder.ApplyConfiguration(new PaymentConfiguration());
+        modelBuilder.ApplyConfiguration(new ChatRoomConfiguration());
+        modelBuilder.ApplyConfiguration(new MessageConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+        modelBuilder.ApplyConfiguration(new ReviewConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
 
@@ -65,16 +79,16 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
 
         var accountData = new[]
         {
-            new { Id = new Guid("20000000-0000-0000-0000-000000000001"), Role = adminRoleId, FirstName = "System", LastName = "Admin1", Email = "admin1@court.com", Phone = "0900000001" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000002"), Role = adminRoleId, FirstName = "System", LastName = "Admin2", Email = "admin2@court.com", Phone = "0900000002" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000003"), Role = managerRoleId, FirstName = "Court", LastName = "Manager1", Email = "manager1@court.com", Phone = "0900000003" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000004"), Role = managerRoleId, FirstName = "Court", LastName = "Manager2", Email = "manager2@court.com", Phone = "0900000004" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000005"), Role = managerRoleId, FirstName = "Court", LastName = "Manager3", Email = "manager3@court.com", Phone = "0900000005" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000006"), Role = playerRoleId, FirstName = "Pro", LastName = "Player1", Email = "player1@court.com", Phone = "0900000006" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000007"), Role = playerRoleId, FirstName = "Pro", LastName = "Player2", Email = "player2@court.com", Phone = "0900000007" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000008"), Role = playerRoleId, FirstName = "Casual", LastName = "Player3", Email = "player3@court.com", Phone = "0900000008" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000009"), Role = playerRoleId, FirstName = "Casual", LastName = "Player4", Email = "player4@court.com", Phone = "0900000009" },
-            new { Id = new Guid("20000000-0000-0000-0000-000000000010"), Role = playerRoleId, FirstName = "Newbie", LastName = "Player5", Email = "player5@court.com", Phone = "0900000010" }
+            new { Id = new Guid("20000000-0000-0000-0000-000000000001"), Role = adminRoleId, FullName = "System Admin1", Email = "admin1@court.com", Phone = "0900000001" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000002"), Role = adminRoleId, FullName = "System Admin2", Email = "admin2@court.com", Phone = "0900000002" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000003"), Role = managerRoleId, FullName = "Court Manager1", Email = "manager1@court.com", Phone = "0900000003" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000004"), Role = managerRoleId, FullName = "Court Manager2", Email = "manager2@court.com", Phone = "0900000004" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000005"), Role = managerRoleId, FullName = "Court Manager3", Email = "manager3@court.com", Phone = "0900000005" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000006"), Role = playerRoleId, FullName = "Pro Player1", Email = "player1@court.com", Phone = "0900000006" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000007"), Role = playerRoleId, FullName = "Pro Player2", Email = "player2@court.com", Phone = "0900000007" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000008"), Role = playerRoleId, FullName = "Casual Player3", Email = "player3@court.com", Phone = "0900000008" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000009"), Role = playerRoleId, FullName = "Casual Player4", Email = "player4@court.com", Phone = "0900000009" },
+            new { Id = new Guid("20000000-0000-0000-0000-000000000010"), Role = playerRoleId, FullName = "Newbie Player5", Email = "player5@court.com", Phone = "0900000010" }
         };
 
         foreach (var data in accountData)
@@ -82,8 +96,8 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
             users.Add(new User
             {
                 Id = data.Id,
-                FirstName = data.FirstName,
-                LastName = data.LastName,
+                FullName = data.FullName,
+                Phone = data.Phone,
                 UserName = data.Email,
                 NormalizedUserName = data.Email.ToUpper(),
                 Email = data.Email,
@@ -106,32 +120,5 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
 
         modelBuilder.Entity<User>().HasData(users);
         modelBuilder.Entity<UserRole>().HasData(userRoles);
-
-        // Seed Courts - Use fixed GUIDs
-        var courtId1 = new Guid("30000000-0000-0000-0000-000000000001");
-        var courtId2 = new Guid("30000000-0000-0000-0000-000000000002");
-
-        modelBuilder.Entity<Court>().HasData(
-            new Court
-            {
-                Id = courtId1,
-                Name = "Court 1 - Basketball",
-                Description = "Professional basketball court",
-                Location = "Downtown Sports Complex",
-                PricePerHour = 50.00m,
-                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsAvailable = true
-            },
-            new Court
-            {
-                Id = courtId2,
-                Name = "Court 2 - Tennis",
-                Description = "Outdoor tennis court",
-                Location = "Central Park",
-                PricePerHour = 40.00m,
-                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsAvailable = true
-            }
-        );
     }
 }

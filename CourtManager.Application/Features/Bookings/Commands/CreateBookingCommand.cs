@@ -10,7 +10,7 @@ namespace CourtManager.Application.Features.Bookings.Commands;
 public class CreateBookingCommand : IRequest<BookingDto>
 {
     public Guid UserId { get; set; }
-    public Guid CourtId { get; set; }
+    public Guid FieldId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
 }

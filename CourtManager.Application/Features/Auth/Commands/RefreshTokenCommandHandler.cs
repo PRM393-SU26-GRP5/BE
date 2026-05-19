@@ -105,8 +105,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
             User = new UserAuthDto
             {
                 Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                FullName = user.FullName,
                 Email = user.Email!,
                 PhoneNumber = user.PhoneNumber ?? string.Empty
             }

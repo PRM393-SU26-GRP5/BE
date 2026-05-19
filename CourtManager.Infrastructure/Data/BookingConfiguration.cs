@@ -21,7 +21,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.UserId)
             .IsRequired();
 
-        builder.Property(b => b.CourtId)
+        builder.Property(b => b.FieldId)
             .IsRequired();
 
         builder.Property(b => b.StartTime)
@@ -30,12 +30,19 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.EndTime)
             .IsRequired();
 
-        builder.Property(b => b.TotalAmount)
+        builder.Property(b => b.TotalPrice)
             .HasPrecision(10, 2);
 
-        builder.Property(b => b.Status)
-            .HasConversion<int>()
-            .HasDefaultValue(BookingStatus.Pending);
+        builder.Property(b => b.BookingStatus)
+            .IsRequired()
+            .HasDefaultValue("Pending")
+            .HasMaxLength(50);
+
+        builder.Property(b => b.Note)
+            .HasMaxLength(500);
+
+        builder.Property(b => b.UpdatedAt)
+            .IsRequired(false);
 
         builder.Property(b => b.CreatedAt)
             .ValueGeneratedOnAdd()
@@ -43,8 +50,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         // Indexes for efficient querying
         builder.HasIndex(b => b.UserId);
-        builder.HasIndex(b => b.CourtId);
-        builder.HasIndex(b => new { b.CourtId, b.StartTime, b.EndTime });
+        builder.HasIndex(b => b.FieldId);
+        builder.HasIndex(b => new { b.FieldId, b.StartTime, b.EndTime });
 
         // Foreign Keys
         builder.HasOne(b => b.User)
@@ -52,14 +59,19 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(b => b.Court)
-            .WithMany(c => c.Bookings)
-            .HasForeignKey(b => b.CourtId)
+        builder.HasOne(b => b.Field)
+            .WithMany(f => f.Bookings)
+            .HasForeignKey(b => b.FieldId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(b => b.Payment)
+        builder.HasMany(b => b.BookingItems)
+            .WithOne(bi => bi.Booking)
+            .HasForeignKey(bi => bi.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(b => b.Payments)
             .WithOne(p => p.Booking)
-            .HasForeignKey<Payment>(p => p.BookingId)
+            .HasForeignKey(p => p.BookingId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Table configuration
