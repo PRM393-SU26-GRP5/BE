@@ -31,6 +31,9 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(r => !r.IsDeleted);
+
         // Relationships
         builder.HasOne(r => r.User)
             .WithMany(u => u.Reviews)

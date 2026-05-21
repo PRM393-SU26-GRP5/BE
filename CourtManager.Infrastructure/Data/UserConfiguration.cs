@@ -33,6 +33,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.IsActive)
             .HasDefaultValue(true);
 
+        // Soft delete query filter
+        builder.HasQueryFilter(u => !u.IsDeleted);
+
         // Relationships
         builder.HasMany(u => u.Bookings)
             .WithOne(b => b.User)

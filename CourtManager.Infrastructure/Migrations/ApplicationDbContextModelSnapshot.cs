@@ -39,11 +39,17 @@ namespace CourtManager.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("FieldId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
@@ -87,6 +93,12 @@ namespace CourtManager.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
@@ -117,8 +129,14 @@ namespace CourtManager.Infrastructure.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("HostId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.HasKey("RoomId");
 
@@ -135,6 +153,9 @@ namespace CourtManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("FieldId")
                         .HasColumnType("uuid");
 
@@ -142,6 +163,9 @@ namespace CourtManager.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.HasKey("ImageId");
 
@@ -159,6 +183,9 @@ namespace CourtManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -179,6 +206,9 @@ namespace CourtManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<decimal>("Latitude")
                         .HasPrecision(10, 7)
@@ -216,6 +246,12 @@ namespace CourtManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("MessageText")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -251,6 +287,12 @@ namespace CourtManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
@@ -288,6 +330,12 @@ namespace CourtManager.Infrastructure.Migrations
 
                     b.Property<Guid>("BookingId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("timestamp with time zone");
@@ -337,8 +385,14 @@ namespace CourtManager.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("FieldId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
@@ -433,11 +487,17 @@ namespace CourtManager.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("FieldId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SlotStatus")
                         .IsRequired()
@@ -480,6 +540,9 @@ namespace CourtManager.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -496,6 +559,9 @@ namespace CourtManager.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -571,6 +637,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "System Admin1",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "ADMIN1@COURT.COM",
@@ -593,6 +660,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "System Admin2",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "ADMIN2@COURT.COM",
@@ -615,6 +683,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Court Manager1",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "MANAGER1@COURT.COM",
@@ -637,6 +706,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Court Manager2",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "MANAGER2@COURT.COM",
@@ -659,6 +729,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Court Manager3",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "MANAGER3@COURT.COM",
@@ -681,6 +752,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Pro Player1",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER1@COURT.COM",
@@ -703,6 +775,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Pro Player2",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER2@COURT.COM",
@@ -725,6 +798,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Casual Player3",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER3@COURT.COM",
@@ -747,6 +821,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Casual Player4",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER4@COURT.COM",
@@ -769,6 +844,7 @@ namespace CourtManager.Infrastructure.Migrations
                             EmailConfirmed = false,
                             FullName = "Newbie Player5",
                             IsActive = true,
+                            IsDeleted = false,
                             LockoutEnabled = false,
                             LoyaltyPoints = 0,
                             NormalizedEmail = "PLAYER5@COURT.COM",

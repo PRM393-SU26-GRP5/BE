@@ -48,6 +48,9 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(b => !b.IsDeleted);
+
         // Indexes for efficient querying
         builder.HasIndex(b => b.UserId);
         builder.HasIndex(b => b.FieldId);

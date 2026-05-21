@@ -10,6 +10,8 @@ public class BookingItem
     public Guid SlotId { get; set; }
     public decimal Price { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation properties
     public Booking? Booking { get; set; }

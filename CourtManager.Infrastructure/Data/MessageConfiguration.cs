@@ -29,6 +29,9 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(m => !m.IsDeleted);
+
         // Relationships
         builder.HasOne(m => m.Room)
             .WithMany(r => r.Messages)

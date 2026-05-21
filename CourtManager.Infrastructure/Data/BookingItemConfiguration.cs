@@ -29,6 +29,9 @@ public class BookingItemConfiguration : IEntityTypeConfiguration<BookingItem>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(bi => !bi.IsDeleted);
+
         // Relationships
         builder.HasOne(bi => bi.Booking)
             .WithMany(b => b.BookingItems)

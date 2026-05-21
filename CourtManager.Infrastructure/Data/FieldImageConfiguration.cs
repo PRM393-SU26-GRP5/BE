@@ -19,6 +19,9 @@ public class FieldImageConfiguration : IEntityTypeConfiguration<FieldImage>
             .IsRequired()
             .HasMaxLength(500);
 
+        // Soft delete query filter
+        builder.HasQueryFilter(i => !i.IsDeleted);
+
         // Relationships
         builder.HasOne(i => i.Field)
             .WithMany(f => f.FieldImages)

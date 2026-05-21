@@ -13,6 +13,8 @@ public class Payment
     public string PaymentStatus { get; set; } = "Pending";
     public string TransactionCode { get; set; } = string.Empty;
     public DateTime? PaidAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation property
     public Booking? Booking { get; set; }

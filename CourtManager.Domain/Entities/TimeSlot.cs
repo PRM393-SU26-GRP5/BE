@@ -12,6 +12,8 @@ public class TimeSlot
     public string SlotStatus { get; set; } = "Available";
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation properties
     public FootballField? Field { get; set; }

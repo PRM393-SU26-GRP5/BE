@@ -25,6 +25,9 @@ public class ChatRoomConfiguration : IEntityTypeConfiguration<ChatRoom>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(r => !r.IsDeleted);
+
         // Relationships
         builder.HasOne(r => r.Customer)
             .WithMany(u => u.CustomerChatRooms)

@@ -11,6 +11,8 @@ public class Notification
     public string Message { get; set; } = string.Empty;
     public bool IsRead { get; set; } = false;
     public DateTime CreatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation property
     public User? User { get; set; }

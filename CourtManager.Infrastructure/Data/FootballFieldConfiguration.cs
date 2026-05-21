@@ -51,6 +51,9 @@ public class FootballFieldConfiguration : IEntityTypeConfiguration<FootballField
         builder.Property(f => f.IsActive)
             .HasDefaultValue(true);
 
+        // Soft delete query filter
+        builder.HasQueryFilter(f => !f.IsDeleted);
+
         // Relationships
         builder.HasOne(f => f.Owner)
             .WithMany(u => u.OwnedFields)

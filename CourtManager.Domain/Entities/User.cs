@@ -16,6 +16,8 @@ public class User : IdentityUser<Guid>
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation properties
     public ICollection<Booking> Bookings { get; set; } = [];

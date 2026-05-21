@@ -42,7 +42,22 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
     {
-        _dbSet.Remove(entity);
+        // Soft delete: Check if entity has IsDeleted property
+        var deletedProperty = entity.GetType().GetProperty("IsDeleted");
+        var deletedAtProperty = entity.GetType().GetProperty("DeletedAt");
+
+        if (deletedProperty != null && deletedAtProperty != null)
+        {
+            deletedProperty.SetValue(entity, true);
+            deletedAtProperty.SetValue(entity, DateTime.UtcNow);
+            _dbSet.Update(entity);
+        }
+        else
+        {
+            // Hard delete for entities without soft delete support
+            _dbSet.Remove(entity);
+        }
+
         await Task.CompletedTask;
     }
 

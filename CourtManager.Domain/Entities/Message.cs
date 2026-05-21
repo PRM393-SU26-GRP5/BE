@@ -10,6 +10,8 @@ public class Message
     public Guid SenderId { get; set; }
     public string MessageText { get; set; } = string.Empty;
     public DateTime SentAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation properties
     public ChatRoom? Room { get; set; }

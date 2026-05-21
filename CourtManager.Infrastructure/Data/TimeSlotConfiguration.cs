@@ -33,6 +33,9 @@ public class TimeSlotConfiguration : IEntityTypeConfiguration<TimeSlot>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(s => !s.IsDeleted);
+
         // Relationships
         builder.HasOne(s => s.Field)
             .WithMany(f => f.TimeSlots)

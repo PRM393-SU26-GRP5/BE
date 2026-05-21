@@ -33,6 +33,9 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        // Soft delete query filter
+        builder.HasQueryFilter(n => !n.IsDeleted);
+
         // Relationships
         builder.HasOne(n => n.User)
             .WithMany(u => u.Notifications)

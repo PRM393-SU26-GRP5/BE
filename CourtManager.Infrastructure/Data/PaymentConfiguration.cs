@@ -43,6 +43,9 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.PaidAt)
             .IsRequired(false);
 
+        // Soft delete query filter
+        builder.HasQueryFilter(p => !p.IsDeleted);
+
         // Indexes
         builder.HasIndex(p => p.BookingId);
         builder.HasIndex(p => p.TransactionCode)
