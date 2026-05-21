@@ -27,7 +27,7 @@ public class BookingItemConfiguration : IEntityTypeConfiguration<BookingItem>
 
         builder.Property(bi => bi.CreatedAt)
             .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         // Relationships
         builder.HasOne(bi => bi.Booking)

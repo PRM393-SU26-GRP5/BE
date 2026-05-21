@@ -46,7 +46,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         builder.Property(b => b.CreatedAt)
             .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         // Indexes for efficient querying
         builder.HasIndex(b => b.UserId);

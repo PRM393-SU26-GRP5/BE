@@ -46,7 +46,7 @@ public class FootballFieldConfiguration : IEntityTypeConfiguration<FootballField
 
         builder.Property(f => f.CreatedAt)
             .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         builder.Property(f => f.IsActive)
             .HasDefaultValue(true);

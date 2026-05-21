@@ -23,7 +23,7 @@ public class ChatRoomConfiguration : IEntityTypeConfiguration<ChatRoom>
 
         builder.Property(r => r.CreatedAt)
             .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         // Relationships
         builder.HasOne(r => r.Customer)

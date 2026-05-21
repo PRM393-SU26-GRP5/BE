@@ -31,7 +31,7 @@ public class TimeSlotConfiguration : IEntityTypeConfiguration<TimeSlot>
 
         builder.Property(s => s.CreatedAt)
             .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         // Relationships
         builder.HasOne(s => s.Field)

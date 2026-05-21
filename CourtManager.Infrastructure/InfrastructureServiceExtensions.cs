@@ -23,9 +23,9 @@ public static class InfrastructureServiceExtensions
     {
         // Register DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(
+            options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                sqlOptions => sqlOptions.MigrationsAssembly("CourtManager.Infrastructure")));
+                npgsqlOptions => npgsqlOptions.MigrationsAssembly("CourtManager.Infrastructure")));
 
         // Register Identity
         services.AddIdentityCore<User>(options =>
