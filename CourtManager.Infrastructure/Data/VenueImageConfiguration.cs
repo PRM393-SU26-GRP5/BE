@@ -5,11 +5,11 @@ using CourtManager.Domain.Entities;
 namespace CourtManager.Infrastructure.Data;
 
 /// <summary>
-/// Entity configuration for FieldImage entity using Fluent API.
+/// Entity configuration for VenueImage entity using Fluent API.
 /// </summary>
-public class FieldImageConfiguration : IEntityTypeConfiguration<FieldImage>
+public class VenueImageConfiguration : IEntityTypeConfiguration<VenueImage>
 {
-    public void Configure(EntityTypeBuilder<FieldImage> builder)
+    public void Configure(EntityTypeBuilder<VenueImage> builder)
     {
         // Primary Key
         builder.HasKey(i => i.ImageId);
@@ -23,12 +23,12 @@ public class FieldImageConfiguration : IEntityTypeConfiguration<FieldImage>
         builder.HasQueryFilter(i => !i.IsDeleted);
 
         // Relationships
-        builder.HasOne(i => i.Field)
-            .WithMany(f => f.FieldImages)
-            .HasForeignKey(i => i.FieldId)
+        builder.HasOne(i => i.Venue)
+            .WithMany(f => f.VenueImages)
+            .HasForeignKey(i => i.VenueId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Table configuration
-        builder.ToTable("FieldImages");
+        builder.ToTable("VenueImages");
     }
 }

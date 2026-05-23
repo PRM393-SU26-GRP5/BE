@@ -28,11 +28,14 @@ public class SearchBookingsQueryHandler : IRequestHandler<SearchBookingsQuery, I
         // Apply filters
         var filtered = allBookings
             .Where(b =>
-                (!request.UserId.HasValue || b.UserId == request.UserId) &&
+                (!request.UserId.HasValue || b.UserId == request.UserId))
+                /*
+                &&
                 (!request.FieldId.HasValue || b.FieldId == request.FieldId) &&
                 (string.IsNullOrEmpty(request.BookingStatus) || b.BookingStatus == request.BookingStatus) &&
                 (!request.StartDate.HasValue || b.StartTime.Date >= request.StartDate.Value.Date) &&
                 (!request.EndDate.HasValue || b.EndTime.Date <= request.EndDate.Value.Date))
+                */
             .OrderByDescending(b => b.CreatedAt)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)

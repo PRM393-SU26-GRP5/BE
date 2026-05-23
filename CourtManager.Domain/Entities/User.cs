@@ -22,10 +22,12 @@ public class User : IdentityUser<Guid>
     // Navigation properties
     public ICollection<Booking> Bookings { get; set; } = [];
     public virtual ICollection<UserRole> UserRoles { get; set; } = [];
-    public ICollection<FootballField> OwnedFields { get; set; } = [];
+    public ICollection<Venue> OwnedVenues { get; set; } = [];
     public ICollection<ChatRoom> CustomerChatRooms { get; set; } = [];
     public ICollection<ChatRoom> HostChatRooms { get; set; } = [];
     public ICollection<Message> SentMessages { get; set; } = [];
     public ICollection<Notification> Notifications { get; set; } = [];
+    public ICollection<NotificationRecipient> NotificationRecipients { get; set; } = [];
     public ICollection<Review> Reviews { get; set; } = [];
+    public ICollection<Discount> CreatedDiscounts { get; set; } = [];
 }

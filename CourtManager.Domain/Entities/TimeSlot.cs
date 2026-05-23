@@ -1,3 +1,5 @@
+using CourtManager.Domain.Enums;
+
 namespace CourtManager.Domain.Entities;
 
 /// <summary>
@@ -9,7 +11,9 @@ public class TimeSlot
     public Guid FieldId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-    public string SlotStatus { get; set; } = "Available";
+    public decimal Price { get; set; }
+    public SlotStatus SlotStatus { get; set; } = SlotStatus.Available;
+    public DateTime? LockedUntil { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; } = false;

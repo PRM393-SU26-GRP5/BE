@@ -64,11 +64,11 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         {
             Id = Guid.NewGuid(),
             UserId = request.UserId,
-            FieldId = request.FieldId,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
+            //FieldId = request.FieldId,
+            //StartTime = request.StartTime,
+            //EndTime = request.EndTime,
             TotalPrice = totalPrice,
-            BookingStatus = "Pending",
+            BookingStatus = CourtManager.Domain.Enums.BookingStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
 

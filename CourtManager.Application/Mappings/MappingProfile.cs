@@ -21,9 +21,9 @@ public class MappingProfile : Profile
         CreateMap<Booking, BookingDto>().ReverseMap();
         CreateMap<Booking, CreateBookingDto>().ReverseMap();
         CreateMap<Booking, BookingHistoryDto>()
-            .ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => src.Field != null ? src.Field.FieldName : null))
-            .ForMember(dest => dest.FieldLocation, opt => opt.MapFrom(src => src.Field != null ? src.Field.Location : null))
-            .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Field != null && src.Field.Owner != null ? src.Field.Owner.FullName : null))
+            //.ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => src.Field != null ? src.Field.FieldName : null))
+            //.ForMember(dest => dest.FieldLocation, opt => opt.MapFrom(src => src.Field != null ? src.Field.Location : null))
+            //.ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Field != null && src.Field.Owner != null ? src.Field.Owner.FullName : null))
             .ReverseMap();
 
         // Payment mappings
@@ -33,7 +33,7 @@ public class MappingProfile : Profile
         CreateMap<TimeSlot, TimeSlotDto>().ReverseMap();
 
         // FieldImage mappings
-        CreateMap<FieldImage, FieldImageDto>().ReverseMap();
+        // CreateMap<FieldImage, FieldImageDto>().ReverseMap();
 
         // ChatRoom mappings
         CreateMap<ChatRoom, ChatRoomDto>()
@@ -52,7 +52,7 @@ public class MappingProfile : Profile
         // Review mappings
         CreateMap<Review, ReviewDto>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.FullName : null))
-            .ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => src.Field != null ? src.Field.FieldName : null))
+            //.ForMember(dest => dest.FieldName, opt => opt.MapFrom(src => src.Field != null ? src.Field.FieldName : null))
             .ReverseMap();
     }
 }

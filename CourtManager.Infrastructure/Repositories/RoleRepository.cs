@@ -9,11 +9,11 @@ namespace CourtManager.Infrastructure.Repositories;
 /// </summary>
 public class RoleRepository : Repository<Role>, IRoleRepository
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _appContext;
 
     public RoleRepository(ApplicationDbContext context) : base(context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -21,7 +21,7 @@ public class RoleRepository : Repository<Role>, IRoleRepository
     /// </summary>
     public async Task<Role?> GetByNameAsync(string name)
     {
-        return await _context.Roles
+        return await _appContext.Roles
             .FirstOrDefaultAsync(r => r.Name == name);
     }
 
@@ -37,8 +37,8 @@ public class RoleRepository : Repository<Role>, IRoleRepository
             AssignedAt = DateTime.UtcNow
         };
 
-        _context.UserRoles.Add(userRole);
-        await _context.SaveChangesAsync();
+        _appContext.UserRoles.Add(userRole);
+        await _appContext.SaveChangesAsync();
     }
 
     /// <summary>
@@ -46,13 +46,13 @@ public class RoleRepository : Repository<Role>, IRoleRepository
     /// </summary>
     public async Task RemoveRoleFromUserAsync(Guid userId, Guid roleId)
     {
-        var userRole = await _context.UserRoles
+        var userRole = await _appContext.UserRoles
             .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
         if (userRole != null)
         {
-            _context.UserRoles.Remove(userRole);
-            await _context.SaveChangesAsync();
+            _appContext.UserRoles.Remove(userRole);
+            await _appContext.SaveChangesAsync();
         }
     }
 }

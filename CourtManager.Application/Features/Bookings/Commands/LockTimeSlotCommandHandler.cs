@@ -31,16 +31,16 @@ public class LockTimeSlotCommandHandler : IRequestHandler<LockTimeSlotCommand, b
             throw new NotFoundException(nameof(TimeSlot), request.SlotId);
 
         // Verify slot is available
-        if (slot.SlotStatus != "Available")
+        if (slot.SlotStatus != CourtManager.Domain.Enums.SlotStatus.Available)
             throw new ValidationException(
                 $"Cannot lock slot. Current status is '{slot.SlotStatus}'. Only 'Available' slots can be locked.");
 
         // Lock the slot
-        slot.SlotStatus = "Locked";
+        slot.SlotStatus = CourtManager.Domain.Enums.SlotStatus.Locked;
         slot.UpdatedAt = DateTime.UtcNow;
 
         // Save changes
-        await _timeSlotRepository.UpdateSlotStatusAsync(request.SlotId, "Locked", cancellationToken);
+        //await _timeSlotRepository.UpdateSlotStatusAsync(request.SlotId, "Locked", cancellationToken);
         await _timeSlotRepository.SaveChangesAsync(cancellationToken);
 
         return true;

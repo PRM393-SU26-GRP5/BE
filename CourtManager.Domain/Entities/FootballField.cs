@@ -1,3 +1,5 @@
+using CourtManager.Domain.Enums;
+
 namespace CourtManager.Domain.Entities;
 
 /// <summary>
@@ -6,13 +8,9 @@ namespace CourtManager.Domain.Entities;
 public class FootballField
 {
     public Guid Id { get; set; }
-    public Guid OwnerId { get; set; }
+    public Guid VenueId { get; set; }
     public string FieldName { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string FieldType { get; set; } = string.Empty;
-    public string Location { get; set; } = string.Empty;
-    public decimal Latitude { get; set; }
-    public decimal Longitude { get; set; }
+    public FieldType FieldType { get; set; }
     public decimal PricePerHour { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -21,9 +19,8 @@ public class FootballField
     public DateTime? DeletedAt { get; set; }
 
     // Navigation properties
-    public User? Owner { get; set; }
+    public Venue? Venue { get; set; }
     public ICollection<Booking> Bookings { get; set; } = [];
-    public ICollection<FieldImage> FieldImages { get; set; } = [];
     public ICollection<TimeSlot> TimeSlots { get; set; } = [];
-    public ICollection<Review> Reviews { get; set; } = [];
+    public ICollection<Discount> Discounts { get; set; } = [];
 }

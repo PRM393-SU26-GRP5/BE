@@ -30,12 +30,12 @@ public class RejectBookingCommandHandler : IRequestHandler<RejectBookingCommand,
             throw new NotFoundException(nameof(Booking), request.BookingId);
 
         // Verify booking is in Pending status
-        if (booking.BookingStatus != "Pending")
+        if (booking.BookingStatus != CourtManager.Domain.Enums.BookingStatus.Pending)
             throw new ValidationException(
                 $"Cannot reject booking. Current status is '{booking.BookingStatus}'. Only 'Pending' bookings can be rejected.");
 
         // Update booking status to Rejected and store rejection reason in Note
-        booking.BookingStatus = "Rejected";
+        booking.BookingStatus = CourtManager.Domain.Enums.BookingStatus.Rejected;
         if (!string.IsNullOrEmpty(request.RejectionReason))
         {
             booking.Note = $"Rejected: {request.RejectionReason}";

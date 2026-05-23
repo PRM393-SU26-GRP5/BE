@@ -5,35 +5,35 @@ using CourtManager.Domain.Interfaces;
 namespace CourtManager.Infrastructure.Repositories;
 
 /// <summary>
-/// Repository implementation for FieldImage entity.
-/// Inherits from base Repository and implements IFieldImageRepository.
+/// Repository implementation for VenueImage entity.
+/// Inherits from base Repository and implements IVenueImageRepository.
 /// </summary>
-public class FieldImageRepository : Repository<FieldImage>, IFieldImageRepository
+public class VenueImageRepository : Repository<VenueImage>, IVenueImageRepository
 {
-    public FieldImageRepository(ApplicationDbContext context) : base(context) { }
+    public VenueImageRepository(ApplicationDbContext context) : base(context) { }
 
-    public async Task<IEnumerable<FieldImage>> GetImagesByFieldIdAsync(
-        Guid fieldId,
+    public async Task<IEnumerable<VenueImage>> GetImagesByVenueIdAsync(
+        Guid venueId,
         CancellationToken cancellationToken = default)
     {
         return await _dbSet
-            .Where(i => i.FieldId == fieldId)
+            .Where(i => i.VenueId == venueId)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task DeleteByFieldIdAsync(
-        Guid fieldId,
+    public async Task DeleteByVenueIdAsync(
+        Guid venueId,
         CancellationToken cancellationToken = default)
     {
         var images = await _dbSet
-            .Where(i => i.FieldId == fieldId)
+            .Where(i => i.VenueId == venueId)
             .ToListAsync(cancellationToken);
 
         _dbSet.RemoveRange(images);
     }
 
     public async Task AddMultipleAsync(
-        IEnumerable<FieldImage> images,
+        IEnumerable<VenueImage> images,
         CancellationToken cancellationToken = default)
     {
         await _dbSet.AddRangeAsync(images, cancellationToken);

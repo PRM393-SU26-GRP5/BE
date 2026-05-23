@@ -16,15 +16,21 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
         : base(options) { }
 
     // DbSets for entities
+    public DbSet<Venue> Venues => Set<Venue>();
+    public DbSet<VenueImage> VenueImages => Set<VenueImage>();
     public DbSet<FootballField> FootballFields => Set<FootballField>();
-    public DbSet<FieldImage> FieldImages => Set<FieldImage>();
+    public DbSet<Amenity> Amenities => Set<Amenity>();
+    public DbSet<VenueAmenity> VenueAmenities => Set<VenueAmenity>();
     public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
+    public DbSet<Discount> Discounts => Set<Discount>();
+    public DbSet<BookingDiscount> BookingDiscounts => Set<BookingDiscount>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<BookingItem> BookingItems => Set<BookingItem>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationRecipient> NotificationRecipients => Set<NotificationRecipient>();
     public DbSet<Review> Reviews => Set<Review>();
 
     /// <summary>
@@ -45,7 +51,7 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
         // Apply all entity configurations
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new FootballFieldConfiguration());
-        modelBuilder.ApplyConfiguration(new FieldImageConfiguration());
+        modelBuilder.ApplyConfiguration(new VenueImageConfiguration());
         modelBuilder.ApplyConfiguration(new TimeSlotConfiguration());
         modelBuilder.ApplyConfiguration(new BookingConfiguration());
         modelBuilder.ApplyConfiguration(new BookingItemConfiguration());
@@ -56,6 +62,10 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, Guid, Identity
         modelBuilder.ApplyConfiguration(new ReviewConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
+
+        modelBuilder.Entity<BookingDiscount>().HasKey(bd => new { bd.BookingId, bd.DiscountId });
+        modelBuilder.Entity<VenueAmenity>().HasKey(va => new { va.VenueId, va.AmenityId });
+        modelBuilder.Entity<NotificationRecipient>().HasKey(nr => nr.RecipientId);
 
         // Seed initial data (optional)
         SeedData(modelBuilder);

@@ -30,12 +30,12 @@ public class AcceptBookingCommandHandler : IRequestHandler<AcceptBookingCommand,
             throw new NotFoundException(nameof(Booking), request.BookingId);
 
         // Verify booking is in Pending status
-        if (booking.BookingStatus != "Pending")
+        if (booking.BookingStatus != CourtManager.Domain.Enums.BookingStatus.Pending)
             throw new ValidationException(
                 $"Cannot accept booking. Current status is '{booking.BookingStatus}'. Only 'Pending' bookings can be accepted.");
 
         // Update booking status to Confirmed
-        booking.BookingStatus = "Confirmed";
+        booking.BookingStatus = CourtManager.Domain.Enums.BookingStatus.Accepted; // Updated from "Confirmed" to match the ER enum
         booking.UpdatedAt = DateTime.UtcNow;
 
         // Save changes

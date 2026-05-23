@@ -35,12 +35,12 @@ public class CancelBookingCommandHandler : IRequestHandler<CancelBookingCommand,
             throw new NotFoundException(nameof(Booking), request.BookingId);
 
         // Verify booking is in a cancellable status (Pending or Confirmed)
-        if (booking.BookingStatus != "Pending" && booking.BookingStatus != "Confirmed")
+        if (booking.BookingStatus != CourtManager.Domain.Enums.BookingStatus.Pending && booking.BookingStatus != CourtManager.Domain.Enums.BookingStatus.Accepted)
             throw new ValidationException(
-                $"Cannot cancel booking. Current status is '{booking.BookingStatus}'. Only 'Pending' or 'Confirmed' bookings can be cancelled.");
+                $"Cannot cancel booking. Current status is '{booking.BookingStatus}'. Only 'Pending' or 'Accepted' bookings can be cancelled.");
 
         // Update booking status to Cancelled and store cancellation reason
-        booking.BookingStatus = "Cancelled";
+        booking.BookingStatus = CourtManager.Domain.Enums.BookingStatus.Cancelled;
         if (!string.IsNullOrEmpty(request.CancellationReason))
         {
             booking.Note = $"Cancelled: {request.CancellationReason}";

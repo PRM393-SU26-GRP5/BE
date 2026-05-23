@@ -8,6 +8,7 @@ public class ChatRoom
     public Guid RoomId { get; set; }
     public Guid CustomerId { get; set; }
     public Guid HostId { get; set; }
+    public DateTime? LastMessageAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }

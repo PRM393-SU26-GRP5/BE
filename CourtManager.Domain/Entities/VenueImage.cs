@@ -1,16 +1,17 @@
 namespace CourtManager.Domain.Entities;
 
 /// <summary>
-/// Represents an image associated with a football field.
+/// Represents an image of a venue.
 /// </summary>
-public class FieldImage
+public class VenueImage
 {
     public Guid ImageId { get; set; }
-    public Guid FieldId { get; set; }
+    public Guid VenueId { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
+    public bool IsPrimary { get; set; }
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }
 
     // Navigation property
-    public FootballField? Field { get; set; }
+    public Venue? Venue { get; set; }
 }

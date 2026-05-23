@@ -3,28 +3,28 @@ using CourtManager.Domain.Entities;
 namespace CourtManager.Domain.Interfaces;
 
 /// <summary>
-/// Repository interface for FieldImage entity operations.
+/// Repository interface for VenueImage entity operations.
 /// </summary>
-public interface IFieldImageRepository : IRepository<FieldImage>
+public interface IVenueImageRepository : IRepository<VenueImage>
 {
     /// <summary>
-    /// Gets all images for a specific football field.
+    /// Gets all images for a specific venue.
     /// </summary>
-    Task<IEnumerable<FieldImage>> GetImagesByFieldIdAsync(
-        Guid fieldId,
+    Task<IEnumerable<VenueImage>> GetImagesByVenueIdAsync(
+        Guid venueId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes all images associated with a field.
+    /// Deletes all images associated with a venue.
     /// </summary>
-    Task DeleteByFieldIdAsync(
-        Guid fieldId,
+    Task DeleteByVenueIdAsync(
+        Guid venueId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds multiple images at once.
     /// </summary>
     Task AddMultipleAsync(
-        IEnumerable<FieldImage> images,
+        IEnumerable<VenueImage> images,
         CancellationToken cancellationToken = default);
 }

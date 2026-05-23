@@ -1,4 +1,6 @@
+using System;
 using CourtManager.Domain.Entities;
+using CourtManager.Domain.Enums;
 
 namespace CourtManager.Application.DTOs;
 

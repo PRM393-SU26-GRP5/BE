@@ -1,3 +1,5 @@
+using CourtManager.Domain.Enums;
+
 namespace CourtManager.Domain.Entities;
 
 /// <summary>
@@ -7,11 +9,9 @@ public class Booking
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public Guid FieldId { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
     public decimal TotalPrice { get; set; }
-    public string BookingStatus { get; set; } = "Pending";
+    public decimal DepositAmount { get; set; }
+    public BookingStatus BookingStatus { get; set; } = BookingStatus.Pending;
     public string? Note { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -20,7 +20,8 @@ public class Booking
 
     // Navigation properties
     public User? User { get; set; }
-    public FootballField? Field { get; set; }
     public ICollection<BookingItem> BookingItems { get; set; } = [];
     public ICollection<Payment> Payments { get; set; } = [];
+    public Review? Review { get; set; }
+    public ICollection<BookingDiscount> BookingDiscounts { get; set; } = [];
 }
