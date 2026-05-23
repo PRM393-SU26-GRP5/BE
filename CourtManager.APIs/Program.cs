@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using CourtManager.Application;
 using CourtManager.Infrastructure;
 using CourtManager.APIs.Configuration;
 using CourtManager.APIs.Middleware;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +16,13 @@ builder.Configuration.GetSection("JwtSettings").Bind(jwtSettings);
 // DEPENDENCY INJECTION REGISTRATION
 // ============================================================================
 
-// Add Application layer services (MediatR, FluentValidation, AutoMapper)
+// 1. Application Layer (MediatR, AutoMapper, FluentValidation)
 builder.Services.AddApplicationServices();
 
-// Add JWT Token Service with configuration
+// 2. Infrastructure Layer (DbContext, Repositories)
+builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// 3. JWT Token Service
 builder.Services.AddJwtTokenService(
     jwtSettings.Secret,
     jwtSettings.Issuer,
@@ -31,107 +30,14 @@ builder.Services.AddJwtTokenService(
     jwtSettings.AccessTokenExpirationInMinutes,
     jwtSettings.RefreshTokenExpirationInDays);
 
-// Add Infrastructure layer services (DbContext, Repositories)
-builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// Add Controllers
-builder.Services.AddControllers();
-
-// Add API Versioning and Swagger/OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new()
-    {
-        Title = "Court Manager API",
-        Version = "v1.0.0",
-        Description = "RESTful API for managing sports court bookings with Clean Architecture and CQRS pattern",
-    });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter your JWT token in the text input below.\n\nExample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    });
-
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", document),
-            new List<string>()
-        }
-    });
-});
-
-// ============================================================================
-// AUTHENTICATION CONFIGURATION
-// ============================================================================
-
-// Configure JWT Authentication
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-            IssuerSigningKey = jwtSettings.GetSymmetricSecurityKey(),
-            ClockSkew = TimeSpan.Zero // No clock skew tolerance
-        };
-
-        // Configure event handlers for JWT validation
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                if (context.Exception is SecurityTokenExpiredException)
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                }
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = context =>
-            {
-                // Add custom logic here if needed after token validation
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-// Add Authorization policies
-builder.Services.AddAuthorization();
-
-// ============================================================================
-// CORS CONFIGURATION
-// ============================================================================
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
+// 4. Web API Layer (Controllers, Swagger, Auth Config, CORS)
+builder.Services.AddWebApiServices(builder.Configuration, jwtSettings);
 
 // ============================================================================
 // LOGGING CONFIGURATION
 // ============================================================================
 
-builder.Logging
-    .ClearProviders()
-    .AddConsole()
-    .AddDebug();
+builder.Logging.ClearProviders().AddConsole().AddDebug();
 
 // ============================================================================
 // BUILD APPLICATION
@@ -143,40 +49,33 @@ var app = builder.Build();
 // MIDDLEWARE PIPELINE CONFIGURATION
 // ============================================================================
 
-// Global Exception Handling Middleware
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
-// Swagger UI (in Development only, but can be enabled in Production if desired)
+// Enable Static Files (Required for Custom Swagger CSS)
+app.UseStaticFiles();
+
+// Swagger UI Configuration
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "Court Manager API v1.0.0");
-        options.RoutePrefix = string.Empty; // Serve Swagger UI at root
+        options.RoutePrefix = string.Empty; 
+        
+        // Inject Custom Cyberpunk Swagger Theme
+        options.InjectStylesheet("/swagger-cyberpunk.css"); 
     });
 }
 
-// HTTPS Redirection
 app.UseHttpsRedirection();
-
-// CORS Middleware
 app.UseCors("AllowAll");
-
-// Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Routing
-app.UseRouting();
-
-// Map Controllers
 app.MapControllers();
 
-// Health check endpoint
-app.MapGet("/api/health", () =>
-    Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
-    .WithName("Health");
+// Health Check Endpoint
+app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow })).WithName("Health");
 
 // ============================================================================
 // APPLICATION STARTUP
@@ -184,15 +83,7 @@ app.MapGet("/api/health", () =>
 
 try
 {
-    app.Logger.LogInformation("Starting Court Manager API...");
-
-    // Apply pending migrations automatically (optional - comment out if you prefer manual migrations)
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<CourtManager.Infrastructure.ApplicationDbContext>();
-        // dbContext.Database.EnsureCreated(); // Creates database if it doesn't exist
-    }
-
+    app.Logger.LogInformation("Starting Court Manager API with Cyberpunk Swagger Theme...");
     app.Run();
 }
 catch (Exception ex)
