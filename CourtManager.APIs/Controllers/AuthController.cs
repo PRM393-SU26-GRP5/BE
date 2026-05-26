@@ -21,6 +21,21 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Get current logged-in user profile.
+    /// </summary>
+    [HttpGet("me")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<UserDto>> GetMe()
+    {
+        // Notice how we don't need to extract the UserId from Claims here anymore!
+        // The GetMeQuery is empty, the Handler uses ICurrentUserService to get the UserId.
+        var result = await _mediator.Send(new CourtManager.Application.Features.Auth.Queries.GetMeQuery());
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Register a new user account.
     /// </summary>
     [HttpPost("register")]

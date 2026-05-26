@@ -11,6 +11,9 @@ public static class ApiServiceExtensions
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         
+        services.AddHttpContextAccessor();
+        services.AddScoped<CourtManager.Application.Interfaces.ICurrentUserService, CourtManager.APIs.Services.CurrentUserService>();
+
         // Swagger Configuration
         services.AddSwaggerGen(options =>
         {
