@@ -5,5 +5,5 @@ namespace CourtManager.Application.Features.Auth.Commands;
 
 public class LogoutCommand : IRequest<AuthResponseDto>
 {
-    public Guid UserId { get; set; }
+    // Empty because UserId will be resolved from ICurrentUserService
 }

@@ -141,13 +141,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponseDto>> Logout()
     {
-        var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized(new AuthResponseDto { Success = false, Message = "Invalid token claims" });
-        }
-
-        var command = new LogoutCommand { UserId = userId };
+        var command = new LogoutCommand();
         var result = await _mediator.Send(command);
 
         if (!result.Success)
@@ -173,15 +167,8 @@ public class AuthController : ControllerBase
             return BadRequest(new AuthResponseDto { Success = false, Message = "New passwords do not match" });
         }
 
-        var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized(new AuthResponseDto { Success = false, Message = "Invalid token claims" });
-        }
-
         var command = new ChangePasswordCommand
         {
-            UserId = userId,
             CurrentPassword = request.CurrentPassword,
             NewPassword = request.NewPassword
         };
