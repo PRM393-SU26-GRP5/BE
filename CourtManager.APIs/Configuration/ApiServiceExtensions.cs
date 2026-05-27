@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Builder;
 
 namespace CourtManager.APIs.Configuration;
 
@@ -82,6 +85,30 @@ public static class ApiServiceExtensions
                 policy.AllowAnyOrigin()
                       .AllowAnyMethod()
                       .AllowAnyHeader();
+            });
+        });
+
+        // Rate Limiting Configuration
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            // Global Policy: 100 requests per minute per IP (or globally if IP not available)
+            options.AddFixedWindowLimiter("GlobalPolicy", policyOptions =>
+            {
+                policyOptions.PermitLimit = 100;
+                policyOptions.Window = TimeSpan.FromMinutes(1);
+                policyOptions.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+                policyOptions.QueueLimit = 0;
+            });
+
+            // Auth Policy: Strict limit for login/register to prevent brute-force attacks (5 req/min)
+            options.AddFixedWindowLimiter("AuthPolicy", policyOptions =>
+            {
+                policyOptions.PermitLimit = 5;
+                policyOptions.Window = TimeSpan.FromMinutes(1);
+                policyOptions.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+                policyOptions.QueueLimit = 0;
             });
         });
 
