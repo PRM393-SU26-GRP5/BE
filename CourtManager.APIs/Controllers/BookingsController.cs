@@ -67,7 +67,7 @@ public class BookingsController : ControllerBase
     /// <param name="id">The booking ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The booking details</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(BookingDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -93,6 +93,24 @@ public class BookingsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("history")]
+    [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookingHistory(CancellationToken cancellationToken = default)
+    {
+        var currentUserId = GetCurrentUserId();
+        var result = await _mediator.Send(new GetUserBookingsQuery(currentUserId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("owner/pending")]
+    [Authorize(Roles = "Manager,Admin")]
+    [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<BookingDto>>> GetOwnerPendingBookings(CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetOwnerPendingBookingsQuery(GetCurrentUserId()), cancellationToken);
+        return Ok(result);
+    }
+
     /// <summary>
     /// Accepts/confirms a pending booking.
     /// Changes booking status from "Pending" to "Confirmed".
@@ -100,7 +118,8 @@ public class BookingsController : ControllerBase
     /// <param name="id">The booking ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("{id}/accept")]
+    [HttpPut("{id:guid}/accept")]
+    [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -111,7 +130,7 @@ public class BookingsController : ControllerBase
     {
         _logger.LogInformation("Accepting booking with ID: {BookingId}", id);
 
-        var command = new AcceptBookingCommand(id);
+        var command = new AcceptBookingCommand(id, GetCurrentUserId());
         var result = await _mediator.Send(command, cancellationToken);
 
         _logger.LogInformation("Booking {BookingId} accepted successfully", id);
@@ -127,7 +146,8 @@ public class BookingsController : ControllerBase
     /// <param name="rejectionReason">Optional reason for rejection</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("{id}/reject")]
+    [HttpPut("{id:guid}/reject")]
+    [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -139,7 +159,7 @@ public class BookingsController : ControllerBase
     {
         _logger.LogInformation("Rejecting booking with ID: {BookingId}", id);
 
-        var command = new RejectBookingCommand(id, rejectionReason);
+        var command = new RejectBookingCommand(id, rejectionReason, GetCurrentUserId());
         var result = await _mediator.Send(command, cancellationToken);
 
         _logger.LogInformation("Booking {BookingId} rejected successfully", id);
@@ -155,7 +175,7 @@ public class BookingsController : ControllerBase
     /// <param name="cancellationReason">Optional reason for cancellation</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("{id}/cancel")]
+    [HttpPut("{id:guid}/cancel")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -241,5 +261,11 @@ public class BookingsController : ControllerBase
     public IActionResult Health()
     {
         return Ok(new { status = "API is running" });
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
     }
 }

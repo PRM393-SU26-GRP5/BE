@@ -9,4 +9,6 @@ public interface IPaymentRepository : IRepository<Payment>
 {
     Task<Payment?> GetByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default);
     Task<Payment?> GetByTransactionIdAsync(string transactionId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Payment>> GetPaymentsByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Payment>> GetPaymentHistoryForUserAsync(Guid userId, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 }

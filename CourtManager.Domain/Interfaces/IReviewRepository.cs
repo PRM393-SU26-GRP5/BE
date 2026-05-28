@@ -16,6 +16,12 @@ public interface IReviewRepository : IRepository<Review>
         int pageSize,
         CancellationToken cancellationToken = default);
 
+    Task<IEnumerable<Review>> GetReviewsByVenueIdAsync(
+        Guid venueId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Gets a specific user's review for a field (if exists).
     /// </summary>
@@ -24,11 +30,20 @@ public interface IReviewRepository : IRepository<Review>
         Guid fieldId,
         CancellationToken cancellationToken = default);
 
+    Task<Review?> GetUserReviewForBookingAsync(
+        Guid userId,
+        Guid bookingId,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Calculates the average rating for a field.
     /// </summary>
     Task<decimal> GetAverageRatingAsync(
         Guid fieldId,
+        CancellationToken cancellationToken = default);
+
+    Task<decimal> GetAverageRatingByVenueIdAsync(
+        Guid venueId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

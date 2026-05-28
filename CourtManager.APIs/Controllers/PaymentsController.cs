@@ -1,4 +1,5 @@
 using CourtManager.Application.DTOs;
+using CourtManager.Application.Features.Payments;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,10 +33,11 @@ public class PaymentsController : ControllerBase
     [HttpGet("booking/{bookingId}")]
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetPaymentsByBooking(Guid bookingId)
+    public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByBooking(Guid bookingId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching payments for booking {BookingId}", bookingId);
-        return Ok(new { message = "Get payments by booking endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetPaymentsByBookingQuery(bookingId, GetCurrentUserId(), IsOwnerOrAdmin()), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -43,13 +45,14 @@ public class PaymentsController : ControllerBase
     /// </summary>
     /// <param name="id">The payment ID</param>
     /// <returns>Payment details</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(PaymentDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetPaymentById(Guid id)
+    public async Task<ActionResult<PaymentDto>> GetPaymentById(Guid id, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching payment {PaymentId}", id);
-        return Ok(new { message = "Get payment by ID endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetPaymentByIdQuery(id, GetCurrentUserId(), IsOwnerOrAdmin()), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -60,11 +63,12 @@ public class PaymentsController : ControllerBase
     /// <returns>Paginated payment history</returns>
     [HttpGet("history")]
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
-    public IActionResult GetPaymentHistory([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentHistory([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Fetching payment history for user {UserId}", userId);
-        return Ok(new { message = "Get payment history endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetPaymentHistoryQuery(GetCurrentUserId(), pageNumber, pageSize), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -76,11 +80,36 @@ public class PaymentsController : ControllerBase
     [ProducesResponseType(typeof(PaymentDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult ProcessPayment([FromBody] PaymentDto payment)
+    public async Task<ActionResult<PaymentDto>> ProcessPayment([FromBody] PaymentDto payment, CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Processing payment for booking {BookingId} by user {UserId}", payment.BookingId, userId);
-        return Ok(new { message = "Process payment endpoint - implementation pending" });
+        var request = new ProcessPaymentRequestDto
+        {
+            BookingId = payment.BookingId,
+            PaymentMethod = payment.PaymentMethod,
+            TransactionCode = payment.TransactionCode
+        };
+        var result = string.Equals(payment.PaymentType, "Final", StringComparison.OrdinalIgnoreCase)
+            ? await _mediator.Send(new ProcessFullPaymentCommand(GetCurrentUserId(), request), cancellationToken)
+            : await _mediator.Send(new ProcessDepositPaymentCommand(GetCurrentUserId(), request), cancellationToken);
+        return CreatedAtAction(nameof(GetPaymentById), new { id = result.Id }, result);
+    }
+
+    [HttpPost("deposit")]
+    [ProducesResponseType(typeof(PaymentDto), StatusCodes.Status201Created)]
+    public async Task<ActionResult<PaymentDto>> PayDeposit([FromBody] ProcessPaymentRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new ProcessDepositPaymentCommand(GetCurrentUserId(), request), cancellationToken);
+        return CreatedAtAction(nameof(GetPaymentById), new { id = result.Id }, result);
+    }
+
+    [HttpPost("full")]
+    [ProducesResponseType(typeof(PaymentDto), StatusCodes.Status201Created)]
+    public async Task<ActionResult<PaymentDto>> PayFull([FromBody] ProcessPaymentRequestDto request, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new ProcessFullPaymentCommand(GetCurrentUserId(), request), cancellationToken);
+        return CreatedAtAction(nameof(GetPaymentById), new { id = result.Id }, result);
     }
 
     /// <summary>
@@ -88,14 +117,23 @@ public class PaymentsController : ControllerBase
     /// </summary>
     /// <param name="id">The payment ID</param>
     /// <returns>Refund status</returns>
-    [HttpPost("{id}/refund")]
+    [HttpPost("{id:guid}/refund")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult RefundPayment(Guid id)
+    public async Task<ActionResult<PaymentDto>> RefundPayment(Guid id, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Refunding payment {PaymentId}", id);
-        return Ok(new { message = "Refund payment endpoint - implementation pending" });
+        var result = await _mediator.Send(new RefundPaymentCommand(id, GetCurrentUserId(), IsOwnerOrAdmin()), cancellationToken);
+        return Ok(result);
     }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
+    }
+
+    private bool IsOwnerOrAdmin() => User.IsInRole("Manager") || User.IsInRole("Admin");
 }

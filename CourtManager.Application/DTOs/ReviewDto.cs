@@ -22,14 +22,20 @@ public class ReviewDto
     public string? UserName { get; set; }
 
     /// <summary>
-    /// Foreign key referencing the reviewed football field.
+    /// Legacy field identifier. The persisted review belongs to a venue.
     /// </summary>
     public Guid FieldId { get; set; }
+
+    public Guid VenueId { get; set; }
+
+    public Guid BookingId { get; set; }
 
     /// <summary>
     /// Name of the reviewed field (optional).
     /// </summary>
     public string? FieldName { get; set; }
+
+    public string? VenueName { get; set; }
 
     /// <summary>
     /// Rating score (typically 1-5).

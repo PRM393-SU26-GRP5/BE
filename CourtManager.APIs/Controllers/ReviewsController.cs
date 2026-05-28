@@ -1,4 +1,5 @@
 using CourtManager.Application.DTOs;
+using CourtManager.Application.Features.Reviews;
 using CourtManager.Application.Features.Reviews.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -36,10 +37,20 @@ public class ReviewsController : ControllerBase
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetReviewsByField(Guid fieldId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsByField(Guid fieldId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching reviews for field {FieldId}", fieldId);
-        return Ok(new { message = "Get reviews by field endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetReviewsByFieldQuery(fieldId, pageNumber, pageSize), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("venue/{venueId}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviewsByVenue(Guid venueId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetReviewsByVenueQuery(venueId, pageNumber, pageSize), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -47,14 +58,15 @@ public class ReviewsController : ControllerBase
     /// </summary>
     /// <param name="id">The review ID</param>
     /// <returns>Review details</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetReviewById(Guid id)
+    public async Task<ActionResult<ReviewDto>> GetReviewById(Guid id, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching review {ReviewId}", id);
-        return Ok(new { message = "Get review by ID endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetReviewByIdQuery(id), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -66,10 +78,21 @@ public class ReviewsController : ControllerBase
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetAverageRating(Guid fieldId)
+    public async Task<ActionResult<object>> GetAverageRating(Guid fieldId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching average rating for field {FieldId}", fieldId);
-        return Ok(new { message = "Get average rating endpoint - implementation pending" });
+        var reviews = await _mediator.Send(new GetReviewsByFieldQuery(fieldId, 1, int.MaxValue), cancellationToken);
+        var list = reviews.ToList();
+        return Ok(new { fieldId, averageRating = list.Count == 0 ? 0 : list.Average(r => r.Rating), reviewCount = list.Count });
+    }
+
+    [HttpGet("venue/{venueId}/average-rating")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    public async Task<ActionResult<object>> GetAverageVenueRating(Guid venueId, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetAverageVenueRatingQuery(venueId), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -78,11 +101,12 @@ public class ReviewsController : ControllerBase
     /// <returns>List of user's reviews</returns>
     [HttpGet("my-reviews")]
     [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
-    public IActionResult GetMyReviews()
+    public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMyReviews(CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Fetching reviews for current user {UserId}", userId);
-        return Ok(new { message = "Get my reviews endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetMyReviewsQuery(GetCurrentUserId()), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -94,11 +118,12 @@ public class ReviewsController : ControllerBase
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult CreateReview([FromBody] ReviewDto review)
+    public async Task<ActionResult<ReviewDto>> CreateReview([FromBody] ReviewDto review, CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Creating review for field {FieldId} by user {UserId}", review.FieldId, userId);
-        return Ok(new { message = "Create review endpoint - implementation pending" });
+        var result = await _mediator.Send(new CreateReviewCommand(GetCurrentUserId(), review), cancellationToken);
+        return CreatedAtAction(nameof(GetReviewById), new { id = result.ReviewId }, result);
     }
 
     /// <summary>
@@ -107,15 +132,16 @@ public class ReviewsController : ControllerBase
     /// <param name="id">The review ID</param>
     /// <param name="review">The updated review data</param>
     /// <returns>Updated review</returns>
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult UpdateReview(Guid id, [FromBody] ReviewDto review)
+    public async Task<ActionResult<ReviewDto>> UpdateReview(Guid id, [FromBody] ReviewDto review, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Updating review {ReviewId}", id);
-        return Ok(new { message = "Update review endpoint - implementation pending" });
+        var result = await _mediator.Send(new UpdateReviewCommand(GetCurrentUserId(), id, review), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -124,7 +150,7 @@ public class ReviewsController : ControllerBase
     /// <param name="id">The review ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -135,5 +161,11 @@ public class ReviewsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         _logger.LogInformation("Review {ReviewId} deleted successfully (soft delete)", id);
         return Ok(new { success = result, message = "Review deleted successfully" });
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
     }
 }

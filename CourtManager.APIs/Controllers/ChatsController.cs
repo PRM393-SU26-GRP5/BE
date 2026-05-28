@@ -1,4 +1,5 @@
 using CourtManager.Application.DTOs;
+using CourtManager.Application.Features.Chats;
 using CourtManager.Application.Features.Chats.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -33,11 +34,12 @@ public class ChatsController : ControllerBase
     /// <returns>Paginated list of chat rooms</returns>
     [HttpGet("rooms")]
     [ProducesResponseType(typeof(IEnumerable<ChatRoomDto>), StatusCodes.Status200OK)]
-    public IActionResult GetChatRooms([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<ChatRoomDto>>> GetChatRooms([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Fetching chat rooms for user {UserId}", userId);
-        return Ok(new { message = "Get chat rooms endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetChatRoomsQuery(GetCurrentUserId(), pageNumber, pageSize), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -48,11 +50,20 @@ public class ChatsController : ControllerBase
     [HttpGet("room/{otherUserId}")]
     [ProducesResponseType(typeof(ChatRoomDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetOrCreateChatRoom(Guid otherUserId)
+    public async Task<ActionResult<ChatRoomDto>> GetOrCreateChatRoom(Guid otherUserId, CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Getting or creating chat room between users {UserId} and {OtherUserId}", userId, otherUserId);
-        return Ok(new { message = "Get or create chat room endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetOrCreateChatRoomQuery(GetCurrentUserId(), otherUserId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("venue/{venueId}/room")]
+    [ProducesResponseType(typeof(ChatRoomDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ChatRoomDto>> GetOrCreateVenueChatRoom(Guid venueId, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetOrCreateVenueChatRoomQuery(GetCurrentUserId(), venueId), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -65,10 +76,11 @@ public class ChatsController : ControllerBase
     [HttpGet("rooms/{roomId}/messages")]
     [ProducesResponseType(typeof(IEnumerable<MessageDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetMessages(Guid roomId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessages(Guid roomId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching messages for room {RoomId}", roomId);
-        return Ok(new { message = "Get messages endpoint - implementation pending" });
+        var result = await _mediator.Send(new GetMessagesQuery(GetCurrentUserId(), roomId, pageNumber, pageSize), cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -82,11 +94,20 @@ public class ChatsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult SendMessage(Guid roomId, [FromBody] MessageDto message)
+    public async Task<ActionResult<MessageDto>> SendMessage(Guid roomId, [FromBody] MessageDto message, CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Sending message to room {RoomId} from user {UserId}", roomId, userId);
-        return Ok(new { message = "Send message endpoint - implementation pending" });
+        var result = await _mediator.Send(new SendMessageCommand(GetCurrentUserId(), roomId, message.MessageText), cancellationToken);
+        return CreatedAtAction(nameof(GetMessages), new { roomId }, result);
+    }
+
+    [HttpPost("messages")]
+    [ProducesResponseType(typeof(MessageDto), StatusCodes.Status201Created)]
+    public async Task<ActionResult<MessageDto>> SendMessageByBody([FromBody] MessageDto message, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new SendMessageCommand(GetCurrentUserId(), message.RoomId, message.MessageText), cancellationToken);
+        return CreatedAtAction(nameof(GetMessages), new { roomId = message.RoomId }, result);
     }
 
     /// <summary>
@@ -126,5 +147,11 @@ public class ChatsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         _logger.LogInformation("Chat room {RoomId} closed successfully (soft delete)", roomId);
         return Ok(new { success = result, message = "Chat room closed successfully" });
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
     }
 }

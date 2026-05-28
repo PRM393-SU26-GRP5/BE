@@ -55,7 +55,8 @@ public class AuthController : ControllerBase
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
             Password = request.Password,
-            ConfirmPassword = request.ConfirmPassword
+            ConfirmPassword = request.ConfirmPassword,
+            Role = request.Role
         };
 
         var result = await _mediator.Send(command);
