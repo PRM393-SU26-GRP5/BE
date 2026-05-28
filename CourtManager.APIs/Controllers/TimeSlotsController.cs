@@ -1,4 +1,5 @@
 using CourtManager.Application.DTOs;
+using CourtManager.Application.Features.Bookings.Commands;
 using CourtManager.Application.Features.Bookings.Queries;
 using CourtManager.Application.Features.TimeSlots;
 using CourtManager.Application.Features.TimeSlots.Commands;
@@ -14,7 +15,7 @@ namespace CourtManager.APIs.Controllers;
 /// Provides CRUD operations and query endpoints for time slots.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/slots")]
 [Authorize]
 public class TimeSlotsController : ControllerBase
 {
@@ -32,7 +33,7 @@ public class TimeSlotsController : ControllerBase
     /// </summary>
     /// <param name="fieldId">The field ID</param>
     /// <returns>List of time slots</returns>
-    [HttpGet]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<TimeSlotDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<TimeSlotDto>>> GetSlotsByField([FromQuery] Guid fieldId, CancellationToken cancellationToken = default)
@@ -47,7 +48,7 @@ public class TimeSlotsController : ControllerBase
     /// </summary>
     /// <param name="id">The time slot ID</param>
     /// <returns>Time slot details</returns>
-    [HttpGet("{id:guid}")]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(TimeSlotDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -74,12 +75,32 @@ public class TimeSlotsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("{id:guid}/lock")]
+    [Authorize(Roles = "Player,Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> LockSlot(Guid id, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Locking slot {SlotId}", id);
+        var result = await _mediator.Send(new LockTimeSlotCommand(id, Guid.NewGuid()), cancellationToken);
+        return Ok(new { success = result, message = "Time slot locked successfully" });
+    }
+
+    [HttpPost("{id:guid}/unlock")]
+    [Authorize(Roles = "Player,Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> UnlockSlot(Guid id, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Unlocking slot {SlotId}", id);
+        var result = await _mediator.Send(new UnlockTimeSlotCommand(id, "CustomerUnlock"), cancellationToken);
+        return Ok(new { success = result, message = "Time slot unlocked successfully" });
+    }
+
     /// <summary>
     /// Creates a new time slot (Manager/Admin only).
     /// </summary>
     /// <param name="slot">The time slot creation data</param>
     /// <returns>Created time slot</returns>
-    [HttpPost]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(TimeSlotDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -97,7 +118,7 @@ public class TimeSlotsController : ControllerBase
     /// <param name="id">The time slot ID</param>
     /// <param name="slot">The updated time slot data</param>
     /// <returns>Updated time slot</returns>
-    [HttpPut("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(TimeSlotDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -116,7 +137,7 @@ public class TimeSlotsController : ControllerBase
     /// <param name="id">The time slot ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

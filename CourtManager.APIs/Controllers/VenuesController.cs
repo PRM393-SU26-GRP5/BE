@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace CourtManager.APIs.Controllers;
 
 [ApiController]
-[Route("api/venues")]
+[Route("api/v1/venues")]
 public class VenuesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -61,7 +61,34 @@ public class VenuesController : ControllerBase
         return Ok(venue);
     }
 
-    [HttpPost]
+    [HttpGet("{id:guid}/fields")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<FootballFieldDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<FootballFieldDto>>> GetVenueFields(Guid id, CancellationToken cancellationToken)
+    {
+        var venue = await _mediator.Send(new GetVenueByIdQuery(id), cancellationToken);
+        return Ok(venue.Fields);
+    }
+
+    [HttpGet("{id:guid}/amenities")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<string>>> GetVenueAmenities(Guid id, CancellationToken cancellationToken)
+    {
+        var venue = await _mediator.Send(new GetVenueByIdQuery(id), cancellationToken);
+        return Ok(venue.Amenities);
+    }
+
+    [HttpGet("{id:guid}/images")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<string>>> GetVenueImages(Guid id, CancellationToken cancellationToken)
+    {
+        var venue = await _mediator.Send(new GetVenueByIdQuery(id), cancellationToken);
+        return Ok(venue.ImageUrls);
+    }
+
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(VenueDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<VenueDto>> CreateVenue([FromBody] CreateVenueDto venue, CancellationToken cancellationToken)
@@ -71,7 +98,7 @@ public class VenuesController : ControllerBase
         return CreatedAtAction(nameof(GetVenueById), new { id = created.VenueId }, created);
     }
 
-    [HttpPut("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(VenueDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<VenueDto>> UpdateVenue(Guid id, [FromBody] UpdateVenueDto venue, CancellationToken cancellationToken)
@@ -80,7 +107,7 @@ public class VenuesController : ControllerBase
         return Ok(updated);
     }
 
-    [HttpDelete("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteVenue(Guid id, CancellationToken cancellationToken)
     {

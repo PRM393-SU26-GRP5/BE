@@ -60,8 +60,11 @@ public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfile
             throw new NotFoundException(nameof(User), request.UserId);
 
         user.FullName = request.Profile.FullName.Trim();
-        user.Phone = request.Profile.PhoneNumber.Trim();
-        user.PhoneNumber = request.Profile.PhoneNumber.Trim();
+        var phone = string.IsNullOrWhiteSpace(request.Profile.PhoneNumber)
+            ? request.Profile.Phone
+            : request.Profile.PhoneNumber;
+        user.Phone = phone.Trim();
+        user.PhoneNumber = phone.Trim();
         user.AvatarUrl = request.Profile.AvatarUrl;
         user.UpdatedAt = DateTime.UtcNow;
 

@@ -13,7 +13,7 @@ namespace CourtManager.APIs.Controllers;
 /// Provides CRUD operations for field reviews and ratings.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/reviews")]
 [Authorize]
 public class ReviewsController : ControllerBase
 {
@@ -33,7 +33,7 @@ public class ReviewsController : ControllerBase
     /// <param name="pageNumber">Page number (default 1)</param>
     /// <param name="pageSize">Page size (default 10)</param>
     /// <returns>Paginated list of reviews</returns>
-    [HttpGet("field/{fieldId}")]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -58,7 +58,7 @@ public class ReviewsController : ControllerBase
     /// </summary>
     /// <param name="id">The review ID</param>
     /// <returns>Review details</returns>
-    [HttpGet("{id:guid}")]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -74,7 +74,7 @@ public class ReviewsController : ControllerBase
     /// </summary>
     /// <param name="fieldId">The field ID</param>
     /// <returns>Average rating</returns>
-    [HttpGet("field/{fieldId}/average-rating")]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,7 +86,7 @@ public class ReviewsController : ControllerBase
         return Ok(new { fieldId, averageRating = list.Count == 0 ? 0 : list.Average(r => r.Rating), reviewCount = list.Count });
     }
 
-    [HttpGet("venue/{venueId}/average-rating")]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetAverageVenueRating(Guid venueId, CancellationToken cancellationToken = default)
@@ -99,7 +99,7 @@ public class ReviewsController : ControllerBase
     /// Gets all reviews by the current user.
     /// </summary>
     /// <returns>List of user's reviews</returns>
-    [HttpGet("my-reviews")]
+    [NonAction]
     [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ReviewDto>>> GetMyReviews(CancellationToken cancellationToken = default)
     {
@@ -123,7 +123,7 @@ public class ReviewsController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         _logger.LogInformation("Creating review for field {FieldId} by user {UserId}", review.FieldId, userId);
         var result = await _mediator.Send(new CreateReviewCommand(GetCurrentUserId(), review), cancellationToken);
-        return CreatedAtAction(nameof(GetReviewById), new { id = result.ReviewId }, result);
+        return Created($"/api/v1/reviews/{result.ReviewId}", result);
     }
 
     /// <summary>
@@ -132,7 +132,7 @@ public class ReviewsController : ControllerBase
     /// <param name="id">The review ID</param>
     /// <param name="review">The updated review data</param>
     /// <returns>Updated review</returns>
-    [HttpPut("{id:guid}")]
+    [NonAction]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -150,7 +150,7 @@ public class ReviewsController : ControllerBase
     /// <param name="id">The review ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("{id:guid}")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

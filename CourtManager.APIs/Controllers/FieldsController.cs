@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace CourtManager.APIs.Controllers;
 
 [ApiController]
-[Route("api/fields")]
+[Route("api/v1/fields")]
 [Authorize]
 public class FieldsController : ControllerBase
 {
@@ -19,7 +19,7 @@ public class FieldsController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("venue/{venueId}")]
+    [NonAction]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<FootballFieldDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<FootballFieldDto>>> GetFieldsByVenue(Guid venueId, CancellationToken cancellationToken)
@@ -37,7 +37,7 @@ public class FieldsController : ControllerBase
         return Ok(field);
     }
 
-    [HttpPost("venue/{venueId}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(FootballFieldDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<FootballFieldDto>> CreateField(Guid venueId, [FromBody] FootballFieldDto field, CancellationToken cancellationToken)
@@ -46,7 +46,7 @@ public class FieldsController : ControllerBase
         return CreatedAtAction(nameof(GetFieldById), new { id = created.Id }, created);
     }
 
-    [HttpPut("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(FootballFieldDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<FootballFieldDto>> UpdateField(Guid id, [FromBody] FootballFieldDto field, CancellationToken cancellationToken)
@@ -55,7 +55,7 @@ public class FieldsController : ControllerBase
         return Ok(updated);
     }
 
-    [HttpDelete("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteField(Guid id, CancellationToken cancellationToken)
     {

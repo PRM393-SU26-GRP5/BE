@@ -79,8 +79,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers().RequireRateLimiting("GlobalPolicy");
 
-// Health Check Endpoint
-app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow })).WithName("Health");
 
 // ============================================================================
 // APPLICATION STARTUP

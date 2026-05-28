@@ -1,6 +1,8 @@
 using CourtManager.Application.Features.Bookings.Commands;
 using CourtManager.Application.Features.Bookings.Queries;
 using CourtManager.Application.DTOs;
+using CourtManager.Application.Features.Payments;
+using CourtManager.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,17 +15,19 @@ namespace CourtManager.APIs.Controllers;
 /// Provides CRUD operations and query endpoints for bookings.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/bookings")]
 [Authorize]
 public class BookingsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<BookingsController> _logger;
+    private readonly IReviewRepository _reviewRepository;
 
-    public BookingsController(IMediator mediator, ILogger<BookingsController> logger)
+    public BookingsController(IMediator mediator, ILogger<BookingsController> logger, IReviewRepository reviewRepository)
     {
         _mediator = mediator;
         _logger = logger;
+        _reviewRepository = reviewRepository;
     }
 
     /// <summary>
@@ -102,7 +106,38 @@ public class BookingsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("owner/pending")]
+    [HttpGet("{id:guid}/payments")]
+    [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<PaymentDto>>> GetBookingPayments(Guid id, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetPaymentsByBookingQuery(id, GetCurrentUserId(), User.IsInRole("Manager") || User.IsInRole("Admin")), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/review")]
+    [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ReviewDto?>> GetBookingReview(Guid id, CancellationToken cancellationToken = default)
+    {
+        var review = await _reviewRepository.GetUserReviewForBookingAsync(GetCurrentUserId(), id, cancellationToken);
+        if (review == null)
+        {
+            return Ok(null);
+        }
+
+        return Ok(new ReviewDto
+        {
+            ReviewId = review.ReviewId,
+            UserId = review.UserId,
+            VenueId = review.VenueId,
+            BookingId = review.BookingId,
+            VenueName = review.Venue?.VenueName,
+            Rating = review.Rating,
+            Comment = review.Comment,
+            CreatedAt = review.CreatedAt
+        });
+    }
+
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetOwnerPendingBookings(CancellationToken cancellationToken = default)
@@ -118,7 +153,7 @@ public class BookingsController : ControllerBase
     /// <param name="id">The booking ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("{id:guid}/accept")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -146,7 +181,7 @@ public class BookingsController : ControllerBase
     /// <param name="rejectionReason">Optional reason for rejection</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("{id:guid}/reject")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -204,7 +239,7 @@ public class BookingsController : ControllerBase
     /// <param name="bookingId">The associated booking ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("slots/{slotId}/lock")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -233,7 +268,7 @@ public class BookingsController : ControllerBase
     /// <param name="unlockReason">Reason for unlock (e.g., "PaymentFailed", "PaymentTimeout", "Refund")</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpPut("slots/{slotId}/unlock")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -253,15 +288,6 @@ public class BookingsController : ControllerBase
         return Ok(new { success = result, message = "Time slot unlocked successfully" });
     }
 
-    /// <summary>
-    /// Health check endpoint for API.
-    /// </summary>
-    [HttpGet("health")]
-    [AllowAnonymous]
-    public IActionResult Health()
-    {
-        return Ok(new { status = "API is running" });
-    }
 
     private Guid GetCurrentUserId()
     {

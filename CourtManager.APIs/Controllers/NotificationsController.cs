@@ -13,7 +13,7 @@ namespace CourtManager.APIs.Controllers;
 /// Provides endpoints for retrieving and managing user notifications.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/notifications")]
 [Authorize]
 public class NotificationsController : ControllerBase
 {
@@ -48,7 +48,7 @@ public class NotificationsController : ControllerBase
     /// </summary>
     /// <param name="id">The notification ID</param>
     /// <returns>Notification details</returns>
-    [HttpGet("{id:guid}")]
+    [NonAction]
     [ProducesResponseType(typeof(NotificationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<NotificationDto>> GetNotificationById(Guid id, CancellationToken cancellationToken = default)
@@ -109,7 +109,7 @@ public class NotificationsController : ControllerBase
     /// <param name="id">The notification ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("{id:guid}")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -13,7 +13,7 @@ namespace CourtManager.APIs.Controllers;
 /// Provides endpoints for real-time communication between users.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/chats")]
 [Authorize]
 public class ChatsController : ControllerBase
 {
@@ -47,7 +47,7 @@ public class ChatsController : ControllerBase
     /// </summary>
     /// <param name="otherUserId">The other user's ID</param>
     /// <returns>Chat room details</returns>
-    [HttpGet("room/{otherUserId}")]
+    [NonAction]
     [ProducesResponseType(typeof(ChatRoomDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ChatRoomDto>> GetOrCreateChatRoom(Guid otherUserId, CancellationToken cancellationToken = default)
@@ -58,11 +58,34 @@ public class ChatsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("venue/{venueId}/room")]
+    [NonAction]
     [ProducesResponseType(typeof(ChatRoomDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<ChatRoomDto>> GetOrCreateVenueChatRoom(Guid venueId, CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(new GetOrCreateVenueChatRoomQuery(GetCurrentUserId(), venueId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("rooms")]
+    [ProducesResponseType(typeof(ChatRoomDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ChatRoomDto>> CreateOrGetRoom([FromBody] CreateChatRoomRequestDto request, CancellationToken cancellationToken = default)
+    {
+        ChatRoomDto result;
+        if (request.VenueId.HasValue)
+        {
+            result = await _mediator.Send(new GetOrCreateVenueChatRoomQuery(GetCurrentUserId(), request.VenueId.Value), cancellationToken);
+        }
+        else
+        {
+            var otherUserId = request.CustomerId == GetCurrentUserId() ? request.OwnerId : request.CustomerId;
+            if (otherUserId == Guid.Empty)
+            {
+                otherUserId = request.OwnerId;
+            }
+
+            result = await _mediator.Send(new GetOrCreateChatRoomQuery(GetCurrentUserId(), otherUserId), cancellationToken);
+        }
+
         return Ok(result);
     }
 
@@ -102,7 +125,7 @@ public class ChatsController : ControllerBase
         return CreatedAtAction(nameof(GetMessages), new { roomId }, result);
     }
 
-    [HttpPost("messages")]
+    [NonAction]
     [ProducesResponseType(typeof(MessageDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<MessageDto>> SendMessageByBody([FromBody] MessageDto message, CancellationToken cancellationToken = default)
     {
@@ -117,7 +140,7 @@ public class ChatsController : ControllerBase
     /// <param name="messageId">The message ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("rooms/{roomId}/messages/{messageId}")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -136,7 +159,7 @@ public class ChatsController : ControllerBase
     /// <param name="roomId">The chat room ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
-    [HttpDelete("rooms/{roomId}")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -149,9 +172,25 @@ public class ChatsController : ControllerBase
         return Ok(new { success = result, message = "Chat room closed successfully" });
     }
 
+    [HttpPut("rooms/{roomId:guid}/read")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> MarkRoomAsRead(Guid roomId, CancellationToken cancellationToken = default)
+    {
+        await _mediator.Send(new GetMessagesQuery(GetCurrentUserId(), roomId, 1, 1), cancellationToken);
+        return Ok(new { unreadCount = 0 });
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
     }
+}
+
+public class CreateChatRoomRequestDto
+{
+    public Guid CustomerId { get; set; }
+    public Guid OwnerId { get; set; }
+    public Guid? VenueId { get; set; }
+    public Guid? BookingId { get; set; }
 }

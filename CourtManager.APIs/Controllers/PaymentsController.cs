@@ -1,5 +1,7 @@
 using CourtManager.Application.DTOs;
 using CourtManager.Application.Features.Payments;
+using CourtManager.Domain.Enums;
+using CourtManager.Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +14,19 @@ namespace CourtManager.APIs.Controllers;
 /// Provides payment processing and transaction history endpoints.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/payments")]
 [Authorize]
 public class PaymentsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<PaymentsController> _logger;
+    private readonly IPaymentRepository _paymentRepository;
 
-    public PaymentsController(IMediator mediator, ILogger<PaymentsController> logger)
+    public PaymentsController(IMediator mediator, ILogger<PaymentsController> logger, IPaymentRepository paymentRepository)
     {
         _mediator = mediator;
         _logger = logger;
+        _paymentRepository = paymentRepository;
     }
 
     /// <summary>
@@ -30,7 +34,7 @@ public class PaymentsController : ControllerBase
     /// </summary>
     /// <param name="bookingId">The booking ID</param>
     /// <returns>List of payments</returns>
-    [HttpGet("booking/{bookingId}")]
+    [NonAction]
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByBooking(Guid bookingId, CancellationToken cancellationToken = default)
@@ -61,7 +65,7 @@ public class PaymentsController : ControllerBase
     /// <param name="pageNumber">Page number (default 1)</param>
     /// <param name="pageSize">Page size (default 10)</param>
     /// <returns>Paginated payment history</returns>
-    [HttpGet("history")]
+    [NonAction]
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentHistory([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
     {
@@ -76,7 +80,7 @@ public class PaymentsController : ControllerBase
     /// </summary>
     /// <param name="payment">The payment creation data</param>
     /// <returns>Created payment</returns>
-    [HttpPost]
+    [NonAction]
     [ProducesResponseType(typeof(PaymentDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -117,7 +121,7 @@ public class PaymentsController : ControllerBase
     /// </summary>
     /// <param name="id">The payment ID</param>
     /// <returns>Refund status</returns>
-    [HttpPost("{id:guid}/refund")]
+    [NonAction]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -129,6 +133,44 @@ public class PaymentsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("momo/callback")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> MomoCallback([FromBody] PaymentGatewayCallbackDto callback, CancellationToken cancellationToken = default)
+    {
+        return await HandleGatewayCallback(callback, "MoMo", cancellationToken);
+    }
+
+    [HttpPost("vnpay/callback")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> VNPayCallback([FromBody] PaymentGatewayCallbackDto callback, CancellationToken cancellationToken = default)
+    {
+        return await HandleGatewayCallback(callback, "VNPay", cancellationToken);
+    }
+
+    private async Task<IActionResult> HandleGatewayCallback(PaymentGatewayCallbackDto callback, string gateway, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(callback.TransactionCode))
+        {
+            return BadRequest(new { success = false, message = "transactionCode is required" });
+        }
+
+        var payment = await _paymentRepository.GetByTransactionIdAsync(callback.TransactionCode, cancellationToken);
+        if (payment == null)
+        {
+            return NotFound(new { success = false, message = "Payment transaction was not found" });
+        }
+
+        payment.PaymentStatus = callback.Success ? PaymentStatus.Success : PaymentStatus.Failed;
+        payment.PaidAt = callback.Success ? DateTime.UtcNow : payment.PaidAt;
+        await _paymentRepository.UpdateAsync(payment, cancellationToken);
+        await _paymentRepository.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("{Gateway} callback updated payment {PaymentId} to {Status}", gateway, payment.Id, payment.PaymentStatus);
+        return Ok(new { success = true, paymentId = payment.Id, paymentStatus = payment.PaymentStatus.ToString() });
+    }
+
     private Guid GetCurrentUserId()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -136,4 +178,10 @@ public class PaymentsController : ControllerBase
     }
 
     private bool IsOwnerOrAdmin() => User.IsInRole("Manager") || User.IsInRole("Admin");
+}
+
+public class PaymentGatewayCallbackDto
+{
+    public string TransactionCode { get; set; } = string.Empty;
+    public bool Success { get; set; }
 }

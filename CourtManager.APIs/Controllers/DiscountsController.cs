@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace CourtManager.APIs.Controllers;
 
 [ApiController]
-[Route("api/discounts")]
+[Route("api/v1/discounts")]
 [Authorize]
 public class DiscountsController : ControllerBase
 {
@@ -27,7 +27,7 @@ public class DiscountsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(IEnumerable<DiscountDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DiscountDto>>> GetMyDiscounts(CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ public class DiscountsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(DiscountDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<DiscountDto>> GetDiscount(Guid id, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ public class DiscountsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(DiscountDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<DiscountDto>> CreateDiscount([FromBody] DiscountDto discount, CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ public class DiscountsController : ControllerBase
         return CreatedAtAction(nameof(GetDiscount), new { id = result.DiscountId }, result);
     }
 
-    [HttpPut("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     [ProducesResponseType(typeof(DiscountDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<DiscountDto>> UpdateDiscount(Guid id, [FromBody] DiscountDto discount, CancellationToken cancellationToken)
@@ -63,7 +63,7 @@ public class DiscountsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("{id:guid}")]
+    [NonAction]
     [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteDiscount(Guid id, CancellationToken cancellationToken)
     {
