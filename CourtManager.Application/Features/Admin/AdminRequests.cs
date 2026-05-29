@@ -63,8 +63,8 @@ public class UpdateAdminUserRoleCommandHandler : IRequestHandler<UpdateAdminUser
         var role = request.Request.Role.Trim().ToLowerInvariant() switch
         {
             "admin" => "Admin",
-            "owner" or "manager" => "Manager",
-            "customer" or "player" => "Player",
+            "owner" or "manager" => "Owner",
+            "customer" or "player" => "Customer",
             _ => string.Empty
         };
 

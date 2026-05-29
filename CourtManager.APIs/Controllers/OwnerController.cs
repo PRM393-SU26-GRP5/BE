@@ -16,7 +16,7 @@ namespace CourtManager.APIs.Controllers;
 
 [ApiController]
 [Route("api/v1/owner")]
-[Authorize(Roles = "Manager,Admin")]
+[Authorize(Roles = "Owner,Admin")]
 public class OwnerController : ControllerBase
 {
     private readonly IMediator _mediator;

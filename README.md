@@ -7,8 +7,8 @@ A production-grade, highly scalable backend API for managing football field book
 ## 1. Project Overview & Business Purpose
 **CourtManager** is a comprehensive platform designed to bridge the gap between sports facility owners and players. By digitizing the traditional process of booking football fields, the system minimizes scheduling conflicts, automates payment tracking, and provides a seamless communication channel between all parties.
 
-* **For Field Owners (Managers)**: The platform allows you to register multiple venues (Venues), manage smaller sub-fields (FootballFields), configure amenities (Wifi, Parking, Water), and define available time slots with dynamic pricing. Owners can also track revenue, view upcoming bookings, and chat directly with customers to provide support.
-* **For Players**: Players can search for nearby fields, view high-quality images and real reviews, apply discount codes, and book multiple time slots atomically to prevent double-booking. They can also pay online and accumulate loyalty points.
+* **For Field Owners**: The platform allows you to register multiple venues (Venues), manage smaller sub-fields (FootballFields), configure amenities (Wifi, Parking, Water), and define available time slots with dynamic pricing. Owners can also track revenue, view upcoming bookings, and chat directly with customers to provide support.
+* **For Customers**: Customers can search for nearby fields, view high-quality images and real reviews, apply discount codes, and book multiple time slots atomically to prevent double-booking. They can also pay online and accumulate loyalty points.
 * **For Admins**: System administrators have global oversight over all users, venues, and transactions to ensure the platform operates smoothly.
 
 ---
@@ -321,7 +321,7 @@ The database includes pre-seeded accounts spanning all core system Roles.
 | Role | Email Account | FullName | Phone Number |
 |:---|:---|:---|:---|
 | **Admin** | `lan.nguyen@courtmanager.vn` | Lan Nguyen | `0902311001` |
-| **Manager** | `duy.pham@sporthub.vn` | Duy Pham | `0902311003` |
-| **Player** | `andang.football@gmail.com` | An Dang | `0902311007` |
+| **Owner** | `duy.pham@sporthub.vn` | Duy Pham | `0902311003` |
+| **Customer** | `andang.football@gmail.com` | An Dang | `0902311007` |
 
 *(See `SampleDataSeeder.cs` for the full list of 12 seeded users).*

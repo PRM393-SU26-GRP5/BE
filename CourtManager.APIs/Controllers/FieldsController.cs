@@ -38,7 +38,7 @@ public class FieldsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(FootballFieldDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<FootballFieldDto>> CreateField(Guid venueId, [FromBody] FootballFieldDto field, CancellationToken cancellationToken)
     {
@@ -47,7 +47,7 @@ public class FieldsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(FootballFieldDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<FootballFieldDto>> UpdateField(Guid id, [FromBody] FootballFieldDto field, CancellationToken cancellationToken)
     {
@@ -56,7 +56,7 @@ public class FieldsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> DeleteField(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteFieldCommand(GetCurrentUserId(), id), cancellationToken);

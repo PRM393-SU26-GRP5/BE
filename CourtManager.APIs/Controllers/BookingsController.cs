@@ -84,7 +84,7 @@ public class BookingsController : ControllerBase
 
         // Resource-based Authorization: Only Admin/Manager or the owner can view this booking
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+        var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Owner");
 
         if (!isAdminOrManager && result.UserId.ToString() != currentUserId)
         {
@@ -108,7 +108,7 @@ public class BookingsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetBookingPayments(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetPaymentsByBookingQuery(id, GetCurrentUserId(), User.IsInRole("Manager") || User.IsInRole("Admin")), cancellationToken);
+        var result = await _mediator.Send(new GetPaymentsByBookingQuery(id, GetCurrentUserId(), User.IsInRole("Owner") || User.IsInRole("Admin")), cancellationToken);
         return Ok(result);
     }
 
@@ -121,7 +121,7 @@ public class BookingsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetOwnerPendingBookings(CancellationToken cancellationToken = default)
     {
@@ -137,7 +137,7 @@ public class BookingsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -165,7 +165,7 @@ public class BookingsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -208,7 +208,7 @@ public class BookingsController : ControllerBase
         var command = new CancelBookingCommand(
             id,
             GetCurrentUserId(),
-            User.IsInRole("Admin") || User.IsInRole("Manager"),
+            User.IsInRole("Admin") || User.IsInRole("Owner"),
             cancellationReason);
         var result = await _mediator.Send(command, cancellationToken);
 

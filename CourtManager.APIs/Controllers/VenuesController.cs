@@ -89,7 +89,7 @@ public class VenuesController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(VenueDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<VenueDto>> CreateVenue([FromBody] CreateVenueDto venue, CancellationToken cancellationToken)
     {
@@ -99,7 +99,7 @@ public class VenuesController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(VenueDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<VenueDto>> UpdateVenue(Guid id, [FromBody] UpdateVenueDto venue, CancellationToken cancellationToken)
     {
@@ -108,7 +108,7 @@ public class VenuesController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> DeleteVenue(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteVenueCommand(id, GetCurrentUserId()), cancellationToken);

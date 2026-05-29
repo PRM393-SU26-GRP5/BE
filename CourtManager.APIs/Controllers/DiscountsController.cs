@@ -28,7 +28,7 @@ public class DiscountsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(IEnumerable<DiscountDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<DiscountDto>>> GetMyDiscounts(CancellationToken cancellationToken)
     {
@@ -37,7 +37,7 @@ public class DiscountsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(DiscountDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<DiscountDto>> GetDiscount(Guid id, CancellationToken cancellationToken)
     {
@@ -46,7 +46,7 @@ public class DiscountsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(DiscountDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<DiscountDto>> CreateDiscount([FromBody] DiscountDto discount, CancellationToken cancellationToken)
     {
@@ -55,7 +55,7 @@ public class DiscountsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(DiscountDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<DiscountDto>> UpdateDiscount(Guid id, [FromBody] DiscountDto discount, CancellationToken cancellationToken)
     {
@@ -64,7 +64,7 @@ public class DiscountsController : ControllerBase
     }
 
     [NonAction]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> DeleteDiscount(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteDiscountCommand(id, GetCurrentUserId()), cancellationToken);

@@ -441,5 +441,5 @@ public class PaymentsController : ControllerBase
         return Guid.TryParse(userIdString, out var userId) ? userId : Guid.Empty;
     }
 
-    private bool IsOwnerOrAdmin() => User.IsInRole("Manager") || User.IsInRole("Admin");
+    private bool IsOwnerOrAdmin() => User.IsInRole("Owner") || User.IsInRole("Admin");
 }

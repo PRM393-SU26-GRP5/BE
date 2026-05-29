@@ -14,8 +14,8 @@ public static class SampleDataSeeder
     private const string DefaultPassword = "Password@123";
 
     private static readonly Guid AdminRoleId = StableGuid("role:admin");
-    private static readonly Guid ManagerRoleId = StableGuid("role:manager");
-    private static readonly Guid PlayerRoleId = StableGuid("role:player");
+    private static readonly Guid OwnerRoleId = StableGuid("role:owner");
+    private static readonly Guid CustomerRoleId = StableGuid("role:customer");
 
     public static async Task SeedSampleDataAsync(this WebApplication app)
     {
@@ -54,21 +54,21 @@ public static class SampleDataSeeder
             },
             new Role
             {
-                Id = ManagerRoleId,
-                Name = "Manager",
-                NormalizedName = "MANAGER",
-                Description = "Venue and field manager",
+                Id = OwnerRoleId,
+                Name = "Owner",
+                NormalizedName = "OWNER",
+                Description = "Venue and field owner",
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                ConcurrencyStamp = ManagerRoleId.ToString()
+                ConcurrencyStamp = OwnerRoleId.ToString()
             },
             new Role
             {
-                Id = PlayerRoleId,
-                Name = "Player",
-                NormalizedName = "PLAYER",
+                Id = CustomerRoleId,
+                Name = "Customer",
+                NormalizedName = "CUSTOMER",
                 Description = "Regular booking customer",
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                ConcurrencyStamp = PlayerRoleId.ToString()
+                ConcurrencyStamp = CustomerRoleId.ToString()
             }
         };
 
@@ -87,16 +87,16 @@ public static class SampleDataSeeder
         {
             MakeUserSpec("lan-nguyen", "Lan Nguyen", "lan.nguyen@courtmanager.vn", "0902311001", "Admin"),
             MakeUserSpec("minh-tran", "Minh Tran", "minh.tran@courtmanager.vn", "0902311002", "Admin"),
-            MakeUserSpec("duy-pham", "Duy Pham", "duy.pham@sporthub.vn", "0902311003", "Manager"),
-            MakeUserSpec("hanh-le", "Hanh Le", "hanh.le@saigonfields.vn", "0902311004", "Manager"),
-            MakeUserSpec("quang-vo", "Quang Vo", "quang.vo@greenpitch.vn", "0902311005", "Manager"),
-            MakeUserSpec("bao-hoang", "Bao Hoang", "bao.hoang@cityarena.vn", "0902311006", "Manager"),
-            MakeUserSpec("an-dang", "An Dang", "andang.football@gmail.com", "0902311007", "Player"),
-            MakeUserSpec("my-pham", "My Pham", "mypham.saigon@gmail.com", "0902311008", "Player"),
-            MakeUserSpec("khoa-bui", "Khoa Bui", "khoabui.runner@outlook.com", "0902311009", "Player"),
-            MakeUserSpec("thao-do", "Thao Do", "thaodo.booking@gmail.com", "0902311010", "Player"),
-            MakeUserSpec("tuan-mai", "Tuan Mai", "tuanmai.sports@yahoo.com", "0902311011", "Player"),
-            MakeUserSpec("linh-huynh", "Linh Huynh", "linhhuynh.club@gmail.com", "0902311012", "Player")
+            MakeUserSpec("duy-pham", "Duy Pham", "duy.pham@sporthub.vn", "0902311003", "Owner"),
+            MakeUserSpec("hanh-le", "Hanh Le", "hanh.le@saigonfields.vn", "0902311004", "Owner"),
+            MakeUserSpec("quang-vo", "Quang Vo", "quang.vo@greenpitch.vn", "0902311005", "Owner"),
+            MakeUserSpec("bao-hoang", "Bao Hoang", "bao.hoang@cityarena.vn", "0902311006", "Owner"),
+            MakeUserSpec("an-dang", "An Dang", "andang.football@gmail.com", "0902311007", "Customer"),
+            MakeUserSpec("my-pham", "My Pham", "mypham.saigon@gmail.com", "0902311008", "Customer"),
+            MakeUserSpec("khoa-bui", "Khoa Bui", "khoabui.runner@outlook.com", "0902311009", "Customer"),
+            MakeUserSpec("thao-do", "Thao Do", "thaodo.booking@gmail.com", "0902311010", "Customer"),
+            MakeUserSpec("tuan-mai", "Tuan Mai", "tuanmai.sports@yahoo.com", "0902311011", "Customer"),
+            MakeUserSpec("linh-huynh", "Linh Huynh", "linhhuynh.club@gmail.com", "0902311012", "Customer")
         };
 
         foreach (var spec in seedUsers)
@@ -118,7 +118,7 @@ public static class SampleDataSeeder
                     PhoneNumberConfirmed = true,
                     CreatedAt = new DateTime(2026, 1, 5, 0, 0, 0, DateTimeKind.Utc),
                     IsActive = true,
-                    LoyaltyPoints = spec.Role == "Player" ? 120 : 0,
+                    LoyaltyPoints = spec.Role == "Customer" ? 120 : 0,
                     SecurityStamp = spec.Id.ToString(),
                     ConcurrencyStamp = spec.Id.ToString()
                 };
@@ -138,8 +138,8 @@ public static class SampleDataSeeder
 
         return new SeedUsers(
             Admins: seedUsers.Where(u => u.Role == "Admin").Select(u => u.Id).ToArray(),
-            Managers: seedUsers.Where(u => u.Role == "Manager").Select(u => u.Id).ToArray(),
-            Players: seedUsers.Where(u => u.Role == "Player").Select(u => u.Id).ToArray());
+            Owners: seedUsers.Where(u => u.Role == "Owner").Select(u => u.Id).ToArray(),
+            Customers: seedUsers.Where(u => u.Role == "Customer").Select(u => u.Id).ToArray());
     }
 
     private static async Task SeedDomainDataAsync(ApplicationDbContext context, SeedUsers users)
@@ -165,18 +165,18 @@ public static class SampleDataSeeder
 
         var venues = new[]
         {
-            Venue(1, users.Managers[0], "Saigon Riverside Sports Park", "12 Nguyen Huu Canh, Binh Thanh, Ho Chi Minh City", 10.791054m, 106.719809m, "Riverside venue with four compact football fields.", "06:00-23:00", "02873010001", true),
-            Venue(2, users.Managers[0], "Thanh Da Community Football Hub", "91 Binh Quoi, Binh Thanh, Ho Chi Minh City", 10.815713m, 106.731719m, "Community sports hub near Thanh Da peninsula.", "05:30-22:30", "02873010002", true),
-            Venue(3, users.Managers[1], "District 7 Green Pitch", "45 Nguyen Luong Bang, District 7, Ho Chi Minh City", 10.729210m, 106.721916m, "Well maintained turf fields for evening leagues.", "06:00-23:30", "02873010003", true),
-            Venue(4, users.Managers[1], "Phu My Hung Arena", "19 Ton Dat Tien, District 7, Ho Chi Minh City", 10.732221m, 106.704730m, "Premium arena close to office and residential areas.", "06:00-23:00", "02873010004", true),
-            Venue(5, users.Managers[2], "Thu Duc University Stadium", "1 Vo Van Ngan, Thu Duc City, Ho Chi Minh City", 10.849643m, 106.771566m, "Large venue suitable for student tournaments.", "05:00-22:00", "02873010005", true),
-            Venue(6, users.Managers[2], "Linh Trung Five-A-Side Club", "37 Linh Trung, Thu Duc City, Ho Chi Minh City", 10.871823m, 106.779496m, "Neighborhood five-a-side club with loyal weekly players.", "05:30-22:30", "02873010006", true),
-            Venue(7, users.Managers[3], "Tan Binh Flight Path Fields", "88 Bach Dang, Tan Binh, Ho Chi Minh City", 10.813651m, 106.665408m, "Convenient fields near the airport corridor.", "06:00-23:00", "02873010007", true),
-            Venue(8, users.Managers[3], "Go Vap Weekend Arena", "154 Phan Van Tri, Go Vap, Ho Chi Minh City", 10.833116m, 106.680982m, "Popular weekend venue for amateur clubs.", "06:00-23:30", "02873010008", true),
-            Venue(9, users.Managers[0], "Binh Tan Sports Yard", "22 Ten Lua, Binh Tan, Ho Chi Minh City", 10.753894m, 106.607990m, "Accessible west-side venue with affordable slots.", "05:30-22:00", "02873010009", true),
-            Venue(10, users.Managers[1], "Da Nang Han River Football Center", "75 Tran Hung Dao, Son Tra, Da Nang", 16.070884m, 108.229401m, "Modern riverside venue in central Da Nang.", "06:00-23:00", "02367301010", true),
-            Venue(11, users.Managers[2], "Hanoi West Lake Mini Pitch", "28 Trich Sai, Tay Ho, Hanoi", 21.055408m, 105.813839m, "Compact football complex near West Lake.", "06:00-22:30", "02473010011", true),
-            Venue(12, users.Managers[3], "Can Tho Ninh Kieu Sports Ground", "9 Hai Ba Trung, Ninh Kieu, Can Tho", 10.034103m, 105.788535m, "Central Can Tho venue for evening bookings.", "05:30-22:30", "02927301012", true)
+            Venue(1, users.Owners[0], "Saigon Riverside Sports Park", "12 Nguyen Huu Canh, Binh Thanh, Ho Chi Minh City", 10.791054m, 106.719809m, "Riverside venue with four compact football fields.", "06:00-23:00", "02873010001", true),
+            Venue(2, users.Owners[0], "Thanh Da Community Football Hub", "91 Binh Quoi, Binh Thanh, Ho Chi Minh City", 10.815713m, 106.731719m, "Community sports hub near Thanh Da peninsula.", "05:30-22:30", "02873010002", true),
+            Venue(3, users.Owners[1], "District 7 Green Pitch", "45 Nguyen Luong Bang, District 7, Ho Chi Minh City", 10.729210m, 106.721916m, "Well maintained turf fields for evening leagues.", "06:00-23:30", "02873010003", true),
+            Venue(4, users.Owners[1], "Phu My Hung Arena", "19 Ton Dat Tien, District 7, Ho Chi Minh City", 10.732221m, 106.704730m, "Premium arena close to office and residential areas.", "06:00-23:00", "02873010004", true),
+            Venue(5, users.Owners[2], "Thu Duc University Stadium", "1 Vo Van Ngan, Thu Duc City, Ho Chi Minh City", 10.849643m, 106.771566m, "Large venue suitable for student tournaments.", "05:00-22:00", "02873010005", true),
+            Venue(6, users.Owners[2], "Linh Trung Five-A-Side Club", "37 Linh Trung, Thu Duc City, Ho Chi Minh City", 10.871823m, 106.779496m, "Neighborhood five-a-side club with loyal weekly players.", "05:30-22:30", "02873010006", true),
+            Venue(7, users.Owners[3], "Tan Binh Flight Path Fields", "88 Bach Dang, Tan Binh, Ho Chi Minh City", 10.813651m, 106.665408m, "Convenient fields near the airport corridor.", "06:00-23:00", "02873010007", true),
+            Venue(8, users.Owners[3], "Go Vap Weekend Arena", "154 Phan Van Tri, Go Vap, Ho Chi Minh City", 10.833116m, 106.680982m, "Popular weekend venue for amateur clubs.", "06:00-23:30", "02873010008", true),
+            Venue(9, users.Owners[0], "Binh Tan Sports Yard", "22 Ten Lua, Binh Tan, Ho Chi Minh City", 10.753894m, 106.607990m, "Accessible west-side venue with affordable slots.", "05:30-22:00", "02873010009", true),
+            Venue(10, users.Owners[1], "Da Nang Han River Football Center", "75 Tran Hung Dao, Son Tra, Da Nang", 16.070884m, 108.229401m, "Modern riverside venue in central Da Nang.", "06:00-23:00", "02367301010", true),
+            Venue(11, users.Owners[2], "Hanoi West Lake Mini Pitch", "28 Trich Sai, Tay Ho, Hanoi", 21.055408m, 105.813839m, "Compact football complex near West Lake.", "06:00-22:30", "02473010011", true),
+            Venue(12, users.Owners[3], "Can Tho Ninh Kieu Sports Ground", "9 Hai Ba Trung, Ninh Kieu, Can Tho", 10.034103m, 105.788535m, "Central Can Tho venue for evening bookings.", "05:30-22:30", "02927301012", true)
         };
 
         var fields = venues.SelectMany((venue, index) => new[]
@@ -209,34 +209,34 @@ public static class SampleDataSeeder
 
         var discounts = new[]
         {
-            Discount(1, users.Managers[0], fields[0].Id, "RIVER20", "Riverside weekday promotion", DiscountType.Percentage, 20, 200000, 60000, 40, 5, true, now),
-            Discount(2, users.Managers[0], null, "COMMUNITY50", "Community club voucher", DiscountType.Fixed, 50000, 300000, 50000, 30, 8, true, now),
-            Discount(3, users.Managers[1], fields[4].Id, "GREEN10", "Green Pitch early week", DiscountType.Percentage, 10, 0, 40000, 25, 4, true, now),
-            Discount(4, users.Managers[1], null, "ARENA75", "Arena loyalty discount", DiscountType.Fixed, 75000, 500000, 75000, 20, 6, true, now),
-            Discount(5, users.Managers[2], fields[8].Id, "STUDENT15", "Student evening offer", DiscountType.Percentage, 15, 150000, 45000, 60, 12, true, now),
-            Discount(6, users.Managers[2], null, "THUDUC30", "Thu Duc neighborhood voucher", DiscountType.Fixed, 30000, 180000, 30000, 80, 18, true, now),
-            Discount(7, users.Managers[3], fields[12].Id, "FLIGHT12", "Airport field promotion", DiscountType.Percentage, 12, 200000, 50000, 35, 7, true, now),
-            Discount(8, users.Managers[3], null, "WEEKEND40", "Weekend booking voucher", DiscountType.Fixed, 40000, 250000, 40000, 45, 9, true, now),
-            Discount(9, users.Managers[0], fields[16].Id, "WESTSIDE8", "West side happy hour", DiscountType.Percentage, 8, 0, 30000, 50, 3, true, now),
-            Discount(10, users.Managers[1], fields[18].Id, "HANRIVER60", "Han River group voucher", DiscountType.Fixed, 60000, 360000, 60000, 28, 5, true, now),
-            Discount(11, users.Managers[2], fields[20].Id, "WESTLAKE18", "West Lake membership discount", DiscountType.Percentage, 18, 300000, 70000, 22, 10, true, now),
-            Discount(12, users.Managers[3], fields[22].Id, "NINHKIEU25", "Ninh Kieu off-peak voucher", DiscountType.Fixed, 25000, 120000, 25000, 70, 11, true, now)
+            Discount(1, users.Owners[0], fields[0].Id, "RIVER20", "Riverside weekday promotion", DiscountType.Percentage, 20, 200000, 60000, 40, 5, true, now),
+            Discount(2, users.Owners[0], null, "COMMUNITY50", "Community club voucher", DiscountType.Fixed, 50000, 300000, 50000, 30, 8, true, now),
+            Discount(3, users.Owners[1], fields[4].Id, "GREEN10", "Green Pitch early week", DiscountType.Percentage, 10, 0, 40000, 25, 4, true, now),
+            Discount(4, users.Owners[1], null, "ARENA75", "Arena loyalty discount", DiscountType.Fixed, 75000, 500000, 75000, 20, 6, true, now),
+            Discount(5, users.Owners[2], fields[8].Id, "STUDENT15", "Student evening offer", DiscountType.Percentage, 15, 150000, 45000, 60, 12, true, now),
+            Discount(6, users.Owners[2], null, "THUDUC30", "Thu Duc neighborhood voucher", DiscountType.Fixed, 30000, 180000, 30000, 80, 18, true, now),
+            Discount(7, users.Owners[3], fields[12].Id, "FLIGHT12", "Airport field promotion", DiscountType.Percentage, 12, 200000, 50000, 35, 7, true, now),
+            Discount(8, users.Owners[3], null, "WEEKEND40", "Weekend booking voucher", DiscountType.Fixed, 40000, 250000, 40000, 45, 9, true, now),
+            Discount(9, users.Owners[0], fields[16].Id, "WESTSIDE8", "West side happy hour", DiscountType.Percentage, 8, 0, 30000, 50, 3, true, now),
+            Discount(10, users.Owners[1], fields[18].Id, "HANRIVER60", "Han River group voucher", DiscountType.Fixed, 60000, 360000, 60000, 28, 5, true, now),
+            Discount(11, users.Owners[2], fields[20].Id, "WESTLAKE18", "West Lake membership discount", DiscountType.Percentage, 18, 300000, 70000, 22, 10, true, now),
+            Discount(12, users.Owners[3], fields[22].Id, "NINHKIEU25", "Ninh Kieu off-peak voucher", DiscountType.Fixed, 25000, 120000, 25000, 70, 11, true, now)
         };
 
         var bookings = new[]
         {
-            Booking(1, users.Players[0], 350000, 175000, BookingStatus.Pending, "Waiting for owner confirmation.", now.AddDays(-5)),
-            Booking(2, users.Players[1], 360000, 180000, BookingStatus.Accepted, "Accepted by venue manager.", now.AddDays(-4)),
-            Booking(3, users.Players[2], 330000, 165000, BookingStatus.Deposited, "Deposit paid through SePay.", now.AddDays(-3)),
-            Booking(4, users.Players[3], 420000, 210000, BookingStatus.Completed, "Completed after final payment.", now.AddDays(-2)),
-            Booking(5, users.Players[4], 275000, 137500, BookingStatus.Cancelled, "Customer cancelled before deposit.", now.AddDays(-7)),
-            Booking(6, users.Players[5], 410000, 205000, BookingStatus.Rejected, "Venue rejected due to maintenance.", now.AddDays(-6)),
-            Booking(7, users.Players[0], 395000, 197500, BookingStatus.Deposited, "Team league match.", now.AddDays(-1)),
-            Booking(8, users.Players[1], 450000, 225000, BookingStatus.Completed, "Company friendly match.", now.AddDays(-8)),
-            Booking(9, users.Players[2], 285000, 142500, BookingStatus.Accepted, "Awaiting deposit payment.", now.AddDays(-2)),
-            Booking(10, users.Players[3], 310000, 155000, BookingStatus.Pending, "New booking request.", now.AddHours(-20)),
-            Booking(11, users.Players[4], 375000, 187500, BookingStatus.Completed, "Weekend tournament slot.", now.AddDays(-9)),
-            Booking(12, users.Players[5], 295000, 147500, BookingStatus.Cancelled, "Schedule changed by customer.", now.AddDays(-10))
+            Booking(1, users.Customers[0], 350000, 175000, BookingStatus.Pending, "Waiting for owner confirmation.", now.AddDays(-5)),
+            Booking(2, users.Customers[1], 360000, 180000, BookingStatus.Accepted, "Accepted by venue owner.", now.AddDays(-4)),
+            Booking(3, users.Customers[2], 330000, 165000, BookingStatus.Deposited, "Deposit paid through SePay.", now.AddDays(-3)),
+            Booking(4, users.Customers[3], 420000, 210000, BookingStatus.Completed, "Completed after final payment.", now.AddDays(-2)),
+            Booking(5, users.Customers[4], 275000, 137500, BookingStatus.Cancelled, "Customer cancelled before deposit.", now.AddDays(-7)),
+            Booking(6, users.Customers[5], 410000, 205000, BookingStatus.Rejected, "Venue rejected due to maintenance.", now.AddDays(-6)),
+            Booking(7, users.Customers[0], 395000, 197500, BookingStatus.Deposited, "Team league match.", now.AddDays(-1)),
+            Booking(8, users.Customers[1], 450000, 225000, BookingStatus.Completed, "Company friendly match.", now.AddDays(-8)),
+            Booking(9, users.Customers[2], 285000, 142500, BookingStatus.Accepted, "Awaiting deposit payment.", now.AddDays(-2)),
+            Booking(10, users.Customers[3], 310000, 155000, BookingStatus.Pending, "New booking request.", now.AddHours(-20)),
+            Booking(11, users.Customers[4], 375000, 187500, BookingStatus.Completed, "Weekend tournament slot.", now.AddDays(-9)),
+            Booking(12, users.Customers[5], 295000, 147500, BookingStatus.Cancelled, "Schedule changed by customer.", now.AddDays(-10))
         };
 
         var bookingItems = bookings.Select((booking, index) => new BookingItem
@@ -280,8 +280,8 @@ public static class SampleDataSeeder
             .Select(i => new ChatRoom
             {
                 RoomId = Id("chat-room", i),
-                CustomerId = users.Players[(i - 1) % users.Players.Length],
-                HostId = users.Managers[(i - 1) % users.Managers.Length],
+                CustomerId = users.Customers[(i - 1) % users.Customers.Length],
+                HostId = users.Owners[(i - 1) % users.Owners.Length],
                 CreatedAt = now.AddDays(-12 + i),
                 LastMessageAt = now.AddDays(-12 + i).AddMinutes(15)
             })
@@ -301,7 +301,7 @@ public static class SampleDataSeeder
             .Select(i => new Notification
             {
                 NotificationId = Id("notification", i),
-                SenderId = i % 2 == 0 ? users.Managers[(i - 1) % users.Managers.Length] : users.Players[(i - 1) % users.Players.Length],
+                SenderId = i % 2 == 0 ? users.Owners[(i - 1) % users.Owners.Length] : users.Customers[(i - 1) % users.Customers.Length],
                 Title = SampleNotificationTitles[i - 1],
                 Message = SampleNotificationMessages[i - 1],
                 Type = (NotificationType)((i - 1) % 5),
@@ -314,7 +314,7 @@ public static class SampleDataSeeder
         {
             RecipientId = Id("notification-recipient", index + 1),
             NotificationId = notification.NotificationId,
-            UserId = index % 2 == 0 ? users.Players[index % users.Players.Length] : users.Managers[index % users.Managers.Length],
+            UserId = index % 2 == 0 ? users.Customers[index % users.Customers.Length] : users.Owners[index % users.Owners.Length],
             IsRead = index % 4 == 0,
             ReadAt = index % 4 == 0 ? notification.CreatedAt.AddHours(2) : null
         }).ToArray();
@@ -323,7 +323,7 @@ public static class SampleDataSeeder
             .Select(i => new Review
             {
                 ReviewId = Id("review", i),
-                UserId = users.Players[(i - 1) % users.Players.Length],
+                UserId = users.Customers[(i - 1) % users.Customers.Length],
                 VenueId = venues[(i - 1) % venues.Length].VenueId,
                 BookingId = bookings[(i - 1) % bookings.Length].Id,
                 Rating = 3 + (i % 3),
@@ -556,5 +556,5 @@ public static class SampleDataSeeder
 
     private sealed record UserSpec(Guid Id, string FullName, string Email, string Phone, string Role);
 
-    private sealed record SeedUsers(Guid[] Admins, Guid[] Managers, Guid[] Players);
+    private sealed record SeedUsers(Guid[] Admins, Guid[] Owners, Guid[] Customers);
 }
