@@ -124,4 +124,39 @@ public class OwnerVenuesController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Updates a venue. Only the owner of the venue may update it.
+    /// </summary>
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateVenue(Guid id, [FromBody] CourtManager.Application.DTOs.UpdateVenueRequestDto request)
+    {
+        var ownerIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(ownerIdStr, out var ownerId))
+        {
+            return Unauthorized(new { success = false, message = "Invalid user ID" });
+        }
+
+        var command = new CourtManager.Application.Features.Venues.Commands.UpdateVenueCommand(
+            id,
+            ownerId,
+            request.VenueName,
+            request.Address,
+            request.Latitude,
+            request.Longitude,
+            request.Description,
+            request.OpeningHours,
+            request.PhoneContact
+        );
+
+        var result = await _mediator.Send(command);
+
+        return Ok(new
+        {
+            success = true,
+            message = "Venue updated successfully",
+            data = result,
+            errors = Array.Empty<string>()
+        });
+    }
 }
