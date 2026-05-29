@@ -13,9 +13,10 @@ public static class SampleDataSeeder
 {
     private const string DefaultPassword = "Password@123";
 
+    private static readonly Guid GuestRoleId = StableGuid("role:guest");
+    private static readonly Guid UserRoleId = StableGuid("role:user");
     private static readonly Guid AdminRoleId = StableGuid("role:admin");
     private static readonly Guid OwnerRoleId = StableGuid("role:owner");
-    private static readonly Guid CustomerRoleId = StableGuid("role:customer");
 
     public static async Task SeedSampleDataAsync(this WebApplication app)
     {
@@ -25,17 +26,17 @@ public static class SampleDataSeeder
         var context = services.GetRequiredService<ApplicationDbContext>();
         await context.Database.MigrateAsync();
 
-        if (await context.Venues.AnyAsync(v => v.VenueName == "Saigon Riverside Sports Park"))
-        {
-            return;
-        }
-
         var userManager = services.GetRequiredService<UserManager<User>>();
         var roleManager = services.GetRequiredService<RoleManager<Role>>();
 
         await EnsureRolesAsync(roleManager);
 
         var users = await EnsureUsersAsync(userManager);
+        if (await context.Venues.AnyAsync(v => v.VenueName == "Saigon Riverside Sports Park"))
+        {
+            return;
+        }
+
         await SeedDomainDataAsync(context, users);
     }
 
@@ -43,6 +44,24 @@ public static class SampleDataSeeder
     {
         var roles = new[]
         {
+            new Role
+            {
+                Id = GuestRoleId,
+                Name = "Guest",
+                NormalizedName = "GUEST",
+                Description = "Unauthenticated visitor role",
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                ConcurrencyStamp = GuestRoleId.ToString()
+            },
+            new Role
+            {
+                Id = UserRoleId,
+                Name = "User",
+                NormalizedName = "USER",
+                Description = "Regular booking user",
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                ConcurrencyStamp = UserRoleId.ToString()
+            },
             new Role
             {
                 Id = AdminRoleId,
@@ -60,15 +79,6 @@ public static class SampleDataSeeder
                 Description = "Venue and field owner",
                 CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 ConcurrencyStamp = OwnerRoleId.ToString()
-            },
-            new Role
-            {
-                Id = CustomerRoleId,
-                Name = "Customer",
-                NormalizedName = "CUSTOMER",
-                Description = "Regular booking customer",
-                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                ConcurrencyStamp = CustomerRoleId.ToString()
             }
         };
 
@@ -91,12 +101,12 @@ public static class SampleDataSeeder
             MakeUserSpec("hanh-le", "Hanh Le", "hanh.le@saigonfields.vn", "0902311004", "Owner"),
             MakeUserSpec("quang-vo", "Quang Vo", "quang.vo@greenpitch.vn", "0902311005", "Owner"),
             MakeUserSpec("bao-hoang", "Bao Hoang", "bao.hoang@cityarena.vn", "0902311006", "Owner"),
-            MakeUserSpec("an-dang", "An Dang", "andang.football@gmail.com", "0902311007", "Customer"),
-            MakeUserSpec("my-pham", "My Pham", "mypham.saigon@gmail.com", "0902311008", "Customer"),
-            MakeUserSpec("khoa-bui", "Khoa Bui", "khoabui.runner@outlook.com", "0902311009", "Customer"),
-            MakeUserSpec("thao-do", "Thao Do", "thaodo.booking@gmail.com", "0902311010", "Customer"),
-            MakeUserSpec("tuan-mai", "Tuan Mai", "tuanmai.sports@yahoo.com", "0902311011", "Customer"),
-            MakeUserSpec("linh-huynh", "Linh Huynh", "linhhuynh.club@gmail.com", "0902311012", "Customer")
+            MakeUserSpec("an-dang", "An Dang", "andang.football@gmail.com", "0902311007", "User"),
+            MakeUserSpec("my-pham", "My Pham", "mypham.saigon@gmail.com", "0902311008", "User"),
+            MakeUserSpec("khoa-bui", "Khoa Bui", "khoabui.runner@outlook.com", "0902311009", "User"),
+            MakeUserSpec("thao-do", "Thao Do", "thaodo.booking@gmail.com", "0902311010", "User"),
+            MakeUserSpec("tuan-mai", "Tuan Mai", "tuanmai.sports@yahoo.com", "0902311011", "User"),
+            MakeUserSpec("linh-huynh", "Linh Huynh", "linhhuynh.club@gmail.com", "0902311012", "User")
         };
 
         foreach (var spec in seedUsers)
@@ -118,7 +128,7 @@ public static class SampleDataSeeder
                     PhoneNumberConfirmed = true,
                     CreatedAt = new DateTime(2026, 1, 5, 0, 0, 0, DateTimeKind.Utc),
                     IsActive = true,
-                    LoyaltyPoints = spec.Role == "Customer" ? 120 : 0,
+                    LoyaltyPoints = spec.Role == "User" ? 120 : 0,
                     SecurityStamp = spec.Id.ToString(),
                     ConcurrencyStamp = spec.Id.ToString()
                 };
@@ -139,7 +149,7 @@ public static class SampleDataSeeder
         return new SeedUsers(
             Admins: seedUsers.Where(u => u.Role == "Admin").Select(u => u.Id).ToArray(),
             Owners: seedUsers.Where(u => u.Role == "Owner").Select(u => u.Id).ToArray(),
-            Customers: seedUsers.Where(u => u.Role == "Customer").Select(u => u.Id).ToArray());
+            Customers: seedUsers.Where(u => u.Role == "User").Select(u => u.Id).ToArray());
     }
 
     private static async Task SeedDomainDataAsync(ApplicationDbContext context, SeedUsers users)

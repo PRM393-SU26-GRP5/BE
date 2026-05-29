@@ -64,7 +64,8 @@ public class UpdateAdminUserRoleCommandHandler : IRequestHandler<UpdateAdminUser
         {
             "admin" => "Admin",
             "owner" or "manager" => "Owner",
-            "customer" or "player" => "Customer",
+            "customer" or "player" or "user" => "User",
+            "guest" => "Guest",
             _ => string.Empty
         };
 
@@ -178,4 +179,3 @@ public class BroadcastNotificationCommandHandler : IRequestHandler<BroadcastNoti
         };
     }
 }
-

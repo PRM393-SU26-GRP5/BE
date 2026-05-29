@@ -13,7 +13,7 @@ public record GetPaymentByIdQuery(Guid PaymentId, Guid UserId, bool IsOwnerOrAdm
 public record GetPaymentByIdPublicQuery(Guid PaymentId) : IRequest<PaymentDto>;
 public record GetPaymentHistoryQuery(Guid UserId, int PageNumber, int PageSize) : IRequest<IEnumerable<PaymentDto>>;
 public record ProcessDepositPaymentCommand(Guid UserId, ProcessPaymentRequestDto Request) : IRequest<PaymentDto>;
-public record ProcessFullPaymentCommand(Guid UserId, ProcessPaymentRequestDto Request) : IRequest<PaymentDto>;
+public record ProcessFullPaymentCommand(Guid UserId, bool IsOwner, bool IsAdmin, ProcessPaymentRequestDto Request) : IRequest<PaymentDto>;
 public record RefundPaymentCommand(Guid PaymentId, Guid UserId, bool IsOwnerOrAdmin) : IRequest<PaymentDto>;
 public record ProcessPaymentGatewayCallbackCommand(PaymentGatewayCallbackDto Callback, string Gateway) : IRequest<PaymentGatewayCallbackResultDto>;
 public record ProcessSePayWebhookCommand(
@@ -203,8 +203,11 @@ public class ProcessFullPaymentCommandHandler : IRequestHandler<ProcessFullPayme
         var booking = await _bookingRepository.GetByIdAsync(request.Request.BookingId, cancellationToken);
         if (booking == null)
             throw new NotFoundException(nameof(Booking), request.Request.BookingId);
-        if (booking.UserId != request.UserId)
-            throw new ValidationException("Only the booking customer can pay the remaining amount.");
+        var isBookingCustomer = booking.UserId == request.UserId;
+        var isBookingOwner = request.IsOwner && booking.BookingItems.Any(i =>
+            i.Slot?.Field?.Venue?.OwnerId == request.UserId);
+        if (!isBookingCustomer && !isBookingOwner && !request.IsAdmin)
+            throw new ValidationException("Only the booking customer, booking owner, or admin can pay the remaining amount.");
         if (booking.BookingStatus != BookingStatus.Deposited)
             throw new ValidationException("Deposit must be paid before full payment.");
         if (booking.Payments.Any(p => p.PaymentType == PaymentType.Final && p.PaymentStatus == PaymentStatus.Success))

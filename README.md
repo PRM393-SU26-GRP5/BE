@@ -322,6 +322,6 @@ The database includes pre-seeded accounts spanning all core system Roles.
 |:---|:---|:---|:---|
 | **Admin** | `lan.nguyen@courtmanager.vn` | Lan Nguyen | `0902311001` |
 | **Owner** | `duy.pham@sporthub.vn` | Duy Pham | `0902311003` |
-| **Customer** | `andang.football@gmail.com` | An Dang | `0902311007` |
+| **User** | `andang.football@gmail.com` | An Dang | `0902311007` |
 
 *(See `SampleDataSeeder.cs` for the full list of 12 seeded users).*

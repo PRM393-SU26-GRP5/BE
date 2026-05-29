@@ -52,9 +52,10 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
 
         var role = request.Role.Trim().ToLowerInvariant() switch
         {
-            "customer" or "player" => "Customer",
+            "customer" or "player" or "user" => "User",
             "owner" or "manager" => "Owner",
-            _ => "Customer"
+            "guest" => "Guest",
+            _ => "User"
         };
 
         // Create new user

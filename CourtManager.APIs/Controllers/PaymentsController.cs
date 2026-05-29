@@ -52,6 +52,7 @@ public class PaymentsController : ControllerBase
     {
         _logger.LogInformation("Fetching payment {PaymentId}", id);
         var payment = await _mediator.Send(new GetPaymentByIdQuery(id, GetCurrentUserId(), IsOwnerOrAdmin()), cancellationToken);
+        AttachPaymentUrl(payment);
         return Ok(payment);
     }
 
@@ -249,6 +250,7 @@ public class PaymentsController : ControllerBase
     public async Task<ActionResult<PaymentDto>> PayDeposit([FromBody] ProcessPaymentRequestDto request, CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(new ProcessDepositPaymentCommand(GetCurrentUserId(), request), cancellationToken);
+        AttachPaymentUrl(result);
         return CreatedAtAction(nameof(GetPaymentById), new { id = result.Id }, result);
     }
 
@@ -258,7 +260,14 @@ public class PaymentsController : ControllerBase
     {
         try
         {
-            var result = await _mediator.Send(new ProcessFullPaymentCommand(GetCurrentUserId(), request), cancellationToken);
+            var result = await _mediator.Send(
+                new ProcessFullPaymentCommand(
+                    GetCurrentUserId(),
+                    User.IsInRole("Owner"),
+                    User.IsInRole("Admin"),
+                    request),
+                cancellationToken);
+            AttachPaymentUrl(result);
             return CreatedAtAction(nameof(GetPaymentById), new { id = result.Id }, result);
         }
         catch (ValidationException ex)
@@ -310,6 +319,18 @@ public class PaymentsController : ControllerBase
         var result = await _mediator.Send(new ProcessPaymentGatewayCallbackCommand(callback, gateway), cancellationToken);
         _logger.LogInformation("{Gateway} callback processed with status {StatusCode}: {Message}", gateway, result.StatusCode, result.Message);
         return StatusCode(result.StatusCode, result);
+    }
+
+    private void AttachPaymentUrl(PaymentDto payment)
+    {
+        if (payment.PaymentMethod != CourtManager.Domain.Enums.PaymentMethod.SePay ||
+            !payment.PaymentStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+        {
+            payment.PaymentUrl = null;
+            return;
+        }
+
+        payment.PaymentUrl = $"{Request.Scheme}://{Request.Host}/api/v1/payments/{payment.Id}/sepay/redirect";
     }
 
     private bool TryValidateSePayApiKey()

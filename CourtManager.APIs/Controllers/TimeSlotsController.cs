@@ -76,7 +76,7 @@ public class TimeSlotsController : ControllerBase
     }
 
     [HttpPost("{id:guid}/lock")]
-    [Authorize(Roles = "Customer,Admin")]
+    [Authorize(Roles = "User,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> LockSlot(Guid id, CancellationToken cancellationToken = default)
     {
@@ -86,7 +86,7 @@ public class TimeSlotsController : ControllerBase
     }
 
     [HttpPost("{id:guid}/unlock")]
-    [Authorize(Roles = "Customer,Admin")]
+    [Authorize(Roles = "User,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UnlockSlot(Guid id, CancellationToken cancellationToken = default)
     {

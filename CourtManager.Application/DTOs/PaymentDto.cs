@@ -17,6 +17,8 @@ public class PaymentDto
     public PaymentMethod PaymentMethod { get; set; }
     public string TransactionCode { get; set; } = string.Empty;
     public DateTime? PaidAt { get; set; }
+    public string? PaymentUrl { get; set; }
+    public string? BookingStatus { get; set; }
 }
 
 public class ProcessPaymentRequestDto

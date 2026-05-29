@@ -58,6 +58,7 @@ public class PaymentRepository : Repository<Payment>, IPaymentRepository
     public async Task<IEnumerable<Payment>> GetPaymentsByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .Include(p => p.Booking)
             .Where(p => p.BookingId == bookingId)
             .OrderByDescending(p => p.PaidAt)
             .ToListAsync(cancellationToken);

@@ -63,6 +63,7 @@ public class MappingProfile : Profile
         CreateMap<Payment, PaymentDto>()
             .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => src.PaymentStatus.ToString()))
             .ForMember(dest => dest.PaymentType, opt => opt.MapFrom(src => src.PaymentType.ToString()))
+            .ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src => src.Booking != null ? src.Booking.BookingStatus.ToString() : null))
             .ReverseMap();
 
         // TimeSlot mappings
