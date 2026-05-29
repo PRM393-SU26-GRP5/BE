@@ -30,4 +30,5 @@ public class User : IdentityUser<Guid>
     public ICollection<NotificationRecipient> NotificationRecipients { get; set; } = [];
     public ICollection<Review> Reviews { get; set; } = [];
     public ICollection<Discount> CreatedDiscounts { get; set; } = [];
+    public ICollection<UserDevice> Devices { get; set; } = [];
 }

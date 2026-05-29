@@ -15,6 +15,8 @@ public class Payment
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     public string TransactionCode { get; set; } = string.Empty;
     public DateTime? PaidAt { get; set; }
+    public decimal? RefundAmount { get; set; } // Set when PaymentType = Refund
+    public string? RefundReason { get; set; }
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }
 
