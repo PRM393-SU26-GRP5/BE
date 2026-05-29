@@ -7,5 +7,5 @@ public class GetNearbyVenuesQuery : IRequest<IEnumerable<VenueDto>>
 {
     public double Latitude { get; set; }
     public double Longitude { get; set; }
-    public double RadiusInKm { get; set; } = 5.0; // Default 5km
+    public double RadiusInKm { get; set; } = 5.0; 
 }

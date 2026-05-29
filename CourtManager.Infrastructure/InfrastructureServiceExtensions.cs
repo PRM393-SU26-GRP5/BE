@@ -41,6 +41,19 @@ public static class InfrastructureServiceExtensions
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
+        // Register Cloudflare R2 / AWS S3
+        var r2Config = configuration.GetSection("CloudflareR2");
+        var awsOptions = new Amazon.S3.AmazonS3Config
+        {
+            ServiceURL = r2Config["ServiceURL"],
+        };
+
+        services.AddSingleton<Amazon.S3.IAmazonS3>(new Amazon.S3.AmazonS3Client(
+            r2Config["AccessKey"],
+            r2Config["SecretKey"],
+            awsOptions
+        ));
+
         // Register repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IFootballFieldRepository, FootballFieldRepository>();
