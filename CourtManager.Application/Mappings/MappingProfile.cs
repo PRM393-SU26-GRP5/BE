@@ -17,6 +17,17 @@ public class MappingProfile : Profile
         // FootballField mappings
         CreateMap<FootballField, FootballFieldDto>().ReverseMap();
 
+        // Venue mappings
+        CreateMap<Venue, VenueDto>()
+            .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Owner != null ? src.Owner.FullName : string.Empty))
+            .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Reviews.Count))
+            .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => 
+                src.Reviews.Any() ? Math.Round(src.Reviews.Average(r => r.Rating), 1) : 0))
+            .ForMember(dest => dest.MinPrice, opt => opt.MapFrom(src => 
+                src.FootballFields.Any() ? src.FootballFields.Min(f => f.PricePerHour) : 0))
+            .ForMember(dest => dest.MaxPrice, opt => opt.MapFrom(src => 
+                src.FootballFields.Any() ? src.FootballFields.Max(f => f.PricePerHour) : 0));
+
         // Booking mappings
         CreateMap<Booking, BookingDto>().ReverseMap();
         CreateMap<Booking, CreateBookingDto>().ReverseMap();
