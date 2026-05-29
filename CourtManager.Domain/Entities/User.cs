@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 namespace CourtManager.Domain.Entities;
 
 /// <summary>
-/// Represents a user in the system (player, manager, or admin).
+/// Represents a user in the system (user, owner, or admin).
 /// </summary>
 public class User : IdentityUser<Guid>
 {

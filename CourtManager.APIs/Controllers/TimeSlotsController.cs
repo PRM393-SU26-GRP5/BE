@@ -74,7 +74,7 @@ public class TimeSlotsController : ControllerBase
     /// <param name="slot">The time slot creation data</param>
     /// <returns>Created time slot</returns>
     [HttpPost]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(TimeSlotDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -91,7 +91,7 @@ public class TimeSlotsController : ControllerBase
     /// <param name="slot">The updated time slot data</param>
     /// <returns>Updated time slot</returns>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(typeof(TimeSlotDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -109,7 +109,7 @@ public class TimeSlotsController : ControllerBase
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

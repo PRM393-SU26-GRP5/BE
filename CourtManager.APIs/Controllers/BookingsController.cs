@@ -82,7 +82,7 @@ public class BookingsController : ControllerBase
 
         // Resource-based Authorization: Only Admin/Manager or the owner can view this booking
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
+        var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Owner");
 
         if (!isAdminOrManager && result.UserId.ToString() != currentUserId)
         {

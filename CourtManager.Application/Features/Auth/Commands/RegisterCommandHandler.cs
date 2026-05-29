@@ -74,8 +74,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             };
         }
 
-        // Add default role "Player"
-        await _userManager.AddToRoleAsync(user, "Player");
+        // Add default role "User"
+        await _userManager.AddToRoleAsync(user, "User");
 
         // Get user roles
         var roles = await _userManager.GetRolesAsync(user);

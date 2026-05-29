@@ -33,7 +33,7 @@ public class AdminController : ControllerBase
     /// Manage courts (Admin or Manager only).
     /// </summary>
     [HttpGet("courts")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Owner")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public IActionResult ManageCourts()
