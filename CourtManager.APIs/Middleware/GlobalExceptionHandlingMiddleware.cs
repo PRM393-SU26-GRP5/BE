@@ -38,6 +38,7 @@ public class GlobalExceptionHandlingMiddleware
         {
             case ArgumentNullException:
             case ArgumentException:
+            case InvalidOperationException:
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 response.Message = "Invalid input provided.";
                 response.Details = exception.Message;

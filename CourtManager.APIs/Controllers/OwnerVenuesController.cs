@@ -126,6 +126,54 @@ public class OwnerVenuesController : ControllerBase
     }
 
     /// <summary>
+    /// Toggles a venue active/inactive. Blocks deactivation when active bookings exist.
+    /// </summary>
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateVenueStatus(Guid id, [FromBody] CourtManager.Application.DTOs.UpdateVenueStatusRequestDto request)
+    {
+        var ownerIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(ownerIdStr, out var ownerId))
+        {
+            return Unauthorized(new { success = false, message = "Invalid user ID" });
+        }
+
+        try
+        {
+            var command = new CourtManager.Application.Features.Venues.Commands.UpdateVenueStatusCommand(
+                id,
+                ownerId,
+                request.IsActive
+            );
+
+            var result = await _mediator.Send(command);
+
+            return Ok(new
+            {
+                success = true,
+                message = result.Message,
+                data = new { isActive = result.IsActive },
+                errors = Array.Empty<string>()
+            });
+        }
+        catch (CourtManager.Application.Exceptions.NotFoundException ex)
+        {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (CourtManager.Application.Exceptions.ForbiddenException ex)
+        {
+            return StatusCode(403, new { success = false, message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Failed to update venue status", errors = new[] { ex.Message } });
+        }
+    }
+
+    /// <summary>
     /// Updates a venue. Only the owner of the venue may update it.
     /// </summary>
     [HttpPut("{id}")]
