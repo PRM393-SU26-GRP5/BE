@@ -132,6 +132,44 @@ public class VenueRepository : Repository<Venue>, IVenueRepository
             .ToListAsync(cancellationToken);
     }
 
+    private IQueryable<Venue> BuildOwnerQuery(Guid ownerId, bool? isActive)
+    {
+        var query = _dbContext.Venues
+            .Include(v => v.Owner)
+            .Include(v => v.FootballFields)
+            .Include(v => v.Reviews)
+            .Where(v => v.OwnerId == ownerId && !v.IsDeleted);
+
+        if (isActive.HasValue)
+        {
+            query = query.Where(v => v.IsActive == isActive.Value);
+        }
+
+        return query;
+    }
+
+    public async Task<IEnumerable<Venue>> GetOwnerVenuesAsync(
+        Guid ownerId,
+        bool? isActive,
+        int skip,
+        int take,
+        CancellationToken cancellationToken = default)
+    {
+        return await BuildOwnerQuery(ownerId, isActive)
+            .OrderByDescending(v => v.CreatedAt)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetOwnerVenuesCountAsync(
+        Guid ownerId,
+        bool? isActive,
+        CancellationToken cancellationToken = default)
+    {
+        return await BuildOwnerQuery(ownerId, isActive).CountAsync(cancellationToken);
+    }
+
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
         var R = 6371; // Radius of the earth in km
