@@ -110,6 +110,19 @@ public class VenueRepository : Repository<Venue>, IVenueRepository
             .ToList();
     }
 
+    public async Task<Venue?> GetVenueByIdAsync(Guid venueId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Venues
+            .Include(v => v.Owner)
+            .Include(v => v.FootballFields)
+            .Include(v => v.VenueImages)
+            .Include(v => v.VenueAmenities)
+                .ThenInclude(va => va.Amenity)
+            .Include(v => v.Reviews)
+                .ThenInclude(r => r.User)
+            .FirstOrDefaultAsync(v => v.VenueId == venueId && v.IsActive && !v.IsDeleted, cancellationToken);
+    }
+
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
         var R = 6371; // Radius of the earth in km

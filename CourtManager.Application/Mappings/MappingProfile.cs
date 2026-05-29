@@ -28,6 +28,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MaxPrice, opt => opt.MapFrom(src => 
                 src.FootballFields.Any() ? src.FootballFields.Max(f => f.PricePerHour) : 0));
 
+        CreateMap<Venue, VenueDetailDto>()
+            .IncludeBase<Venue, VenueDto>()
+            .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.VenueImages))
+            .ForMember(dest => dest.Amenities, opt => opt.MapFrom(src => src.VenueAmenities.Select(va => va.Amenity)))
+            .ForMember(dest => dest.Fields, opt => opt.MapFrom(src => src.FootballFields));
+
+        CreateMap<VenueImage, VenueImageDto>().ReverseMap();
+        CreateMap<Amenity, AmenityDto>().ReverseMap();
+
         // Booking mappings
         CreateMap<Booking, BookingDto>().ReverseMap();
         CreateMap<Booking, CreateBookingDto>().ReverseMap();

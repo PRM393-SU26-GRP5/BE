@@ -26,4 +26,6 @@ public interface IVenueRepository : IRepository<Venue>
         double longitude,
         double radiusInKm,
         CancellationToken cancellationToken = default);
+
+    Task<Venue?> GetVenueByIdAsync(Guid venueId, CancellationToken cancellationToken = default);
 }
