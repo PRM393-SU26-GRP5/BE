@@ -18,6 +18,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IBookingRepository _bookingRepository;
     private readonly ITimeSlotRepository _timeSlotRepository;
     private readonly IDiscountRepository _discountRepository;
+    private readonly INotificationRepository _notificationRepository;
     private readonly IMapper _mapper;
 
     public CreateBookingCommandHandler(
@@ -26,6 +27,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         IBookingRepository bookingRepository,
         ITimeSlotRepository timeSlotRepository,
         IDiscountRepository discountRepository,
+        INotificationRepository notificationRepository,
         IMapper mapper)
     {
         _userRepository = userRepository;
@@ -33,6 +35,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         _bookingRepository = bookingRepository;
         _timeSlotRepository = timeSlotRepository;
         _discountRepository = discountRepository;
+        _notificationRepository = notificationRepository;
         _mapper = mapper;
     }
 
@@ -162,6 +165,32 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             slot.SlotStatus = CourtManager.Domain.Enums.SlotStatus.Locked;
             slot.LockedUntil = DateTime.UtcNow.AddMinutes(15);
             slot.UpdatedAt = DateTime.UtcNow;
+        }
+
+        var notificationOwnerId = slots
+            .Select(s => s.Field?.Venue?.OwnerId)
+            .FirstOrDefault(id => id.HasValue && id.Value != Guid.Empty);
+
+        if (notificationOwnerId.HasValue)
+        {
+            await _notificationRepository.AddAsync(new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                SenderId = request.UserId,
+                Title = "New booking request",
+                Message = $"A new booking request {booking.Id} is waiting for approval.",
+                Type = CourtManager.Domain.Enums.NotificationType.Booking,
+                RefId = booking.Id.ToString(),
+                CreatedAt = DateTime.UtcNow,
+                NotificationRecipients =
+                [
+                    new NotificationRecipient
+                    {
+                        RecipientId = Guid.NewGuid(),
+                        UserId = notificationOwnerId.Value
+                    }
+                ]
+            }, cancellationToken);
         }
 
         // Save booking

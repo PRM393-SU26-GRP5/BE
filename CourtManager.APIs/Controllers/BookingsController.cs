@@ -79,28 +79,28 @@ public class BookingsController : ControllerBase
     {
         _logger.LogInformation("Fetching booking with ID: {BookingId}", id);
 
-        var query = new GetBookingByIdQuery(id);
+        var query = new GetBookingByIdQuery(
+            id,
+            GetCurrentUserId(),
+            User.IsInRole("Owner"),
+            User.IsInRole("Admin"));
         var result = await _mediator.Send(query, cancellationToken);
-
-        // Resource-based Authorization: Only Admin/Manager or the owner can view this booking
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Owner");
-
-        if (!isAdminOrManager && result.UserId.ToString() != currentUserId)
-        {
-            _logger.LogWarning("User {UserId} attempted to access booking {BookingId} which they do not own.", currentUserId, id);
-            return Forbid();
-        }
 
         return Ok(result);
     }
 
     [HttpGet("history")]
     [ProducesResponseType(typeof(IEnumerable<BookingDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookingHistory(CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookingHistory(
+        [FromQuery] string? status = null,
+        [FromQuery] DateTime? from = null,
+        [FromQuery] DateTime? to = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
         var currentUserId = GetCurrentUserId();
-        var result = await _mediator.Send(new GetUserBookingsQuery(currentUserId), cancellationToken);
+        var result = await _mediator.Send(new GetUserBookingsQuery(currentUserId, status, from, to, page, pageSize), cancellationToken);
         return Ok(result);
     }
 
@@ -208,7 +208,7 @@ public class BookingsController : ControllerBase
         var command = new CancelBookingCommand(
             id,
             GetCurrentUserId(),
-            User.IsInRole("Admin") || User.IsInRole("Owner"),
+            false,
             cancellationReason);
         var result = await _mediator.Send(command, cancellationToken);
 
