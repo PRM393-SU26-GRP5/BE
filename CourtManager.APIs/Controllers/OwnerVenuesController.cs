@@ -54,4 +54,74 @@ public class OwnerVenuesController : ControllerBase
             errors = Array.Empty<string>()
         });
     }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateVenue([FromBody] CourtManager.Application.DTOs.CreateVenueRequestDto request)
+    {
+        var ownerIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(ownerIdStr, out var ownerId))
+        {
+            return Unauthorized(new { success = false, message = "Invalid user ID" });
+        }
+
+        var command = new CourtManager.Application.Features.Venues.Commands.CreateVenueCommand(
+            ownerId,
+            request.VenueName,
+            request.Address,
+            request.Latitude,
+            request.Longitude,
+            request.Description,
+            request.OpeningHours,
+            request.PhoneContact
+        );
+
+        var result = await _mediator.Send(command);
+
+        return Ok(new
+        {
+            success = true,
+            message = "Venue created successfully",
+            data = result,
+            errors = Array.Empty<string>()
+        });
+    }
+
+    [HttpPost("{id}/images")]
+    public async Task<IActionResult> UploadVenueImages(Guid id, [FromForm] List<Microsoft.AspNetCore.Http.IFormFile> images)
+    {
+        if (images == null || !images.Any())
+        {
+            return BadRequest(new { success = false, message = "No images provided" });
+        }
+
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdStr, out var userId))
+        {
+            return Unauthorized(new { success = false, message = "Invalid user ID" });
+        }
+
+        try
+        {
+            var fileDtos = images.Select(f => new CourtManager.Application.DTOs.FileUploadDto(f.OpenReadStream(), f.FileName, f.ContentType)).ToList();
+            var command = new CourtManager.Application.Features.Venues.Commands.UploadVenueImagesCommand(id, userId, fileDtos);
+            var uploadedUrls = await _mediator.Send(command);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Images uploaded successfully",
+                data = uploadedUrls,
+                errors = Array.Empty<string>()
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                success = false,
+                message = "Failed to upload images",
+                errors = new[] { ex.Message }
+            });
+        }
+    }
 }
