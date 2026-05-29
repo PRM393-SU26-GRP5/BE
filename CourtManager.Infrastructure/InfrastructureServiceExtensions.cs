@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using CourtManager.Domain.Entities;
 using CourtManager.Domain.Interfaces;
 using CourtManager.Infrastructure.Repositories;
+using CourtManager.Application.Interfaces;
+using CourtManager.Infrastructure.Services;
 
 namespace CourtManager.Infrastructure;
 
@@ -67,6 +69,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IVenueRepository, VenueRepository>();
         services.AddScoped<IAmenityRepository, AmenityRepository>();
+        services.AddScoped<IStorageService, CloudflareR2StorageService>();
 
         return services;
     }
