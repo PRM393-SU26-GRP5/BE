@@ -28,4 +28,5 @@ public interface IVenueRepository : IRepository<Venue>
         CancellationToken cancellationToken = default);
 
     Task<Venue?> GetVenueByIdAsync(Guid venueId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Amenity>> GetVenueAmenitiesAsync(Guid venueId, CancellationToken cancellationToken = default);
 }

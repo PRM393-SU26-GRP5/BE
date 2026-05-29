@@ -123,6 +123,15 @@ public class VenueRepository : Repository<Venue>, IVenueRepository
             .FirstOrDefaultAsync(v => v.VenueId == venueId && v.IsActive && !v.IsDeleted, cancellationToken);
     }
 
+    public async Task<IEnumerable<Amenity>> GetVenueAmenitiesAsync(Guid venueId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.VenueAmenities
+            .Where(va => va.VenueId == venueId)
+            .Include(va => va.Amenity)
+            .Select(va => va.Amenity!)
+            .ToListAsync(cancellationToken);
+    }
+
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
         var R = 6371; // Radius of the earth in km

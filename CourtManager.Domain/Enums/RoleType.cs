@@ -2,7 +2,8 @@ namespace CourtManager.Domain.Enums;
 
 public enum RoleType
 {
-    Customer = 0,
-    Owner = 1,
-    Admin = 2
+    Guest = 0,
+    User = 1,
+    Owner = 2,
+    Admin = 3
 }
