@@ -13,6 +13,7 @@ public record GetReviewsByFieldQuery(Guid FieldId, int PageNumber, int PageSize)
 public record GetReviewByIdQuery(Guid ReviewId) : IRequest<ReviewDto>;
 public record GetAverageVenueRatingQuery(Guid VenueId) : IRequest<object>;
 public record GetMyReviewsQuery(Guid UserId) : IRequest<IEnumerable<ReviewDto>>;
+public record GetUserReviewForBookingQuery(Guid UserId, Guid BookingId) : IRequest<ReviewDto?>;
 public record CreateReviewCommand(Guid UserId, ReviewDto Review) : IRequest<ReviewDto>;
 public record UpdateReviewCommand(Guid UserId, Guid ReviewId, ReviewDto Review) : IRequest<ReviewDto>;
 
@@ -159,6 +160,24 @@ public class CreateReviewCommandHandler : IRequestHandler<CreateReviewCommand, R
 
         var loaded = await _reviewRepository.GetByIdAsync(review.ReviewId, cancellationToken) ?? review;
         return _mapper.Map<ReviewDto>(loaded);
+    }
+}
+
+public class GetUserReviewForBookingQueryHandler : IRequestHandler<GetUserReviewForBookingQuery, ReviewDto?>
+{
+    private readonly IReviewRepository _reviewRepository;
+    private readonly IMapper _mapper;
+
+    public GetUserReviewForBookingQueryHandler(IReviewRepository reviewRepository, IMapper mapper)
+    {
+        _reviewRepository = reviewRepository;
+        _mapper = mapper;
+    }
+
+    public async Task<ReviewDto?> Handle(GetUserReviewForBookingQuery request, CancellationToken cancellationToken)
+    {
+        var review = await _reviewRepository.GetUserReviewForBookingAsync(request.UserId, request.BookingId, cancellationToken);
+        return review == null ? null : _mapper.Map<ReviewDto>(review);
     }
 }
 

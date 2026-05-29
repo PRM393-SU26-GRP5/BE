@@ -154,6 +154,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 DiscountAmount = discountAmount
             });
             discount.UsedCount += 1;
+            await _discountRepository.UpdateAsync(discount, cancellationToken);
         }
 
         foreach (var slot in slots)

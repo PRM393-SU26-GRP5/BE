@@ -320,8 +320,8 @@ The database includes pre-seeded accounts spanning all core system Roles.
 ### Seeded Profiles
 | Role | Email Account | FullName | Phone Number |
 |:---|:---|:---|:---|
-| **Admin** | `admin1@court.com` | System Admin1 | `0900000001` |
-| **Manager** | `manager1@court.com` | Court Manager1 | `0900000003` |
-| **Player** | `player1@court.com` | Pro Player1 | `0900000006` |
+| **Admin** | `lan.nguyen@courtmanager.vn` | Lan Nguyen | `0902311001` |
+| **Manager** | `duy.pham@sporthub.vn` | Duy Pham | `0902311003` |
+| **Player** | `andang.football@gmail.com` | An Dang | `0902311007` |
 
-*(See `ApplicationDbContext.cs` for the full list of 10 seeded users).*
+*(See `SampleDataSeeder.cs` for the full list of 12 seeded users).*

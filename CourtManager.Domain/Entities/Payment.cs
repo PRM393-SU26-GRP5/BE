@@ -14,6 +14,11 @@ public class Payment
     public PaymentMethod PaymentMethod { get; set; }
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     public string TransactionCode { get; set; } = string.Empty;
+    public string? Gateway { get; set; }
+    public string? GatewayTransactionId { get; set; }
+    public string? GatewayReferenceCode { get; set; }
+    public string? GatewayAccountNumber { get; set; }
+    public string? GatewayRawContent { get; set; }
     public DateTime? PaidAt { get; set; }
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }

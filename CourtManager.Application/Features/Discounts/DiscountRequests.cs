@@ -203,6 +203,7 @@ public class ValidateDiscountCommandHandler : IRequestHandler<ValidateDiscountCo
     {
         var totalAmount = request.Request.TotalAmount;
         Guid? fieldId = request.Request.FieldId;
+        Guid? ownerId = null;
 
         if (request.Request.SlotIds.Length > 0)
         {
@@ -216,10 +217,11 @@ public class ValidateDiscountCommandHandler : IRequestHandler<ValidateDiscountCo
             }
 
             fieldId ??= slots.FirstOrDefault()?.FieldId;
+            ownerId = slots.FirstOrDefault()?.Field?.Venue?.OwnerId;
             totalAmount = slots.Sum(s => s.Price);
         }
 
-        var discount = await _discountRepository.GetByCodeAsync(request.Request.Code, fieldId, null, cancellationToken);
+        var discount = await _discountRepository.GetByCodeAsync(request.Request.Code, fieldId, ownerId, cancellationToken);
         if (discount == null)
             return Invalid("Discount code does not exist.", totalAmount);
         if (!discount.IsActive || discount.StartDate > DateTime.UtcNow || discount.EndDate < DateTime.UtcNow)

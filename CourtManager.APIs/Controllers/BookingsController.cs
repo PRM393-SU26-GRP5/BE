@@ -2,7 +2,7 @@ using CourtManager.Application.Features.Bookings.Commands;
 using CourtManager.Application.Features.Bookings.Queries;
 using CourtManager.Application.DTOs;
 using CourtManager.Application.Features.Payments;
-using CourtManager.Domain.Interfaces;
+using CourtManager.Application.Features.Reviews;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,13 +21,11 @@ public class BookingsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<BookingsController> _logger;
-    private readonly IReviewRepository _reviewRepository;
 
-    public BookingsController(IMediator mediator, ILogger<BookingsController> logger, IReviewRepository reviewRepository)
+    public BookingsController(IMediator mediator, ILogger<BookingsController> logger)
     {
         _mediator = mediator;
         _logger = logger;
-        _reviewRepository = reviewRepository;
     }
 
     /// <summary>
@@ -118,23 +116,8 @@ public class BookingsController : ControllerBase
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<ReviewDto?>> GetBookingReview(Guid id, CancellationToken cancellationToken = default)
     {
-        var review = await _reviewRepository.GetUserReviewForBookingAsync(GetCurrentUserId(), id, cancellationToken);
-        if (review == null)
-        {
-            return Ok(null);
-        }
-
-        return Ok(new ReviewDto
-        {
-            ReviewId = review.ReviewId,
-            UserId = review.UserId,
-            VenueId = review.VenueId,
-            BookingId = review.BookingId,
-            VenueName = review.Venue?.VenueName,
-            Rating = review.Rating,
-            Comment = review.Comment,
-            CreatedAt = review.CreatedAt
-        });
+        var review = await _mediator.Send(new GetUserReviewForBookingQuery(GetCurrentUserId(), id), cancellationToken);
+        return Ok(review);
     }
 
     [NonAction]
@@ -222,7 +205,11 @@ public class BookingsController : ControllerBase
     {
         _logger.LogInformation("Cancelling booking with ID: {BookingId}", id);
 
-        var command = new CancelBookingCommand(id, cancellationReason);
+        var command = new CancelBookingCommand(
+            id,
+            GetCurrentUserId(),
+            User.IsInRole("Admin") || User.IsInRole("Manager"),
+            cancellationReason);
         var result = await _mediator.Send(command, cancellationToken);
 
         _logger.LogInformation("Booking {BookingId} cancelled successfully", id);

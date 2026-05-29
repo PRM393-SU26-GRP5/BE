@@ -13,6 +13,7 @@ public class MappingProfile : Profile
     {
         // User mappings
         CreateMap<User, UserDto>().ReverseMap();
+        CreateMap<Amenity, AmenityDto>().ReverseMap();
 
         CreateMap<Venue, VenueDto>()
             .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.Owner != null ? src.Owner.FullName : null))

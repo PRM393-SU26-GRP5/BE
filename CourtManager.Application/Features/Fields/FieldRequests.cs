@@ -85,7 +85,8 @@ public class CreateFieldCommandHandler : IRequestHandler<CreateFieldCommand, Foo
         {
             Id = Guid.NewGuid(),
             VenueId = request.VenueId,
-            FieldName = request.Field.FieldName.Trim(),
+            FieldName = request.Field.FieldName?.Trim() ?? string.Empty,
+            Description = request.Field.Description?.Trim() ?? string.Empty,
             FieldType = ParseFieldType(request.Field.FieldType),
             PricePerHour = request.Field.PricePerHour,
             IsActive = request.Field.IsActive,
@@ -136,7 +137,8 @@ public class UpdateFieldCommandHandler : IRequestHandler<UpdateFieldCommand, Foo
             throw new ValidationException("Only the venue owner can update this field.");
         }
 
-        field.FieldName = request.Field.FieldName.Trim();
+        field.FieldName = request.Field.FieldName?.Trim() ?? string.Empty;
+        field.Description = request.Field.Description?.Trim() ?? string.Empty;
         field.FieldType = CreateFieldCommandHandler.ParseFieldType(request.Field.FieldType);
         field.PricePerHour = request.Field.PricePerHour;
         field.IsActive = request.Field.IsActive;

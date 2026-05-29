@@ -4,7 +4,8 @@
 # Compiled outputs
 bin/
 obj/
-scripts/smoke-flow.ps1
+scripts/
+artifacts/
 *.dll
 *.exe
 *.out

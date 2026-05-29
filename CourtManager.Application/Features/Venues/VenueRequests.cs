@@ -142,8 +142,8 @@ public class CreateVenueCommandHandler : IRequestHandler<CreateVenueCommand, Ven
         {
             VenueId = Guid.NewGuid(),
             OwnerId = request.OwnerId,
-            VenueName = request.Venue.VenueName.Trim(),
-            Address = request.Venue.Address.Trim(),
+            VenueName = request.Venue.VenueName?.Trim() ?? string.Empty,
+            Address = request.Venue.Address?.Trim() ?? string.Empty,
             Latitude = request.Venue.Latitude,
             Longitude = request.Venue.Longitude,
             Description = request.Venue.Description,
@@ -151,7 +151,7 @@ public class CreateVenueCommandHandler : IRequestHandler<CreateVenueCommand, Ven
             PhoneContact = request.Venue.PhoneContact,
             IsActive = request.Venue.IsActive,
             CreatedAt = DateTime.UtcNow,
-            VenueImages = request.Venue.ImageUrls.Select((url, index) => new VenueImage
+            VenueImages = (request.Venue.ImageUrls ?? []).Select((url, index) => new VenueImage
             {
                 ImageId = Guid.NewGuid(),
                 ImageUrl = url,
@@ -191,8 +191,8 @@ public class UpdateVenueCommandHandler : IRequestHandler<UpdateVenueCommand, Ven
             throw new ValidationException("Only the venue owner can update this venue.");
         }
 
-        venue.VenueName = request.Venue.VenueName.Trim();
-        venue.Address = request.Venue.Address.Trim();
+        venue.VenueName = request.Venue.VenueName?.Trim() ?? string.Empty;
+        venue.Address = request.Venue.Address?.Trim() ?? string.Empty;
         venue.Latitude = request.Venue.Latitude;
         venue.Longitude = request.Venue.Longitude;
         venue.Description = request.Venue.Description;

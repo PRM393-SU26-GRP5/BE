@@ -78,6 +78,10 @@ public class TimeSlotRepository : Repository<TimeSlot>, ITimeSlotRepository
         foreach (var slot in slots)
         {
             slot.SlotStatus = parsedStatus;
+            if (parsedStatus == SlotStatus.Available)
+            {
+                slot.LockedUntil = null;
+            }
             slot.UpdatedAt = DateTime.UtcNow;
         }
     }

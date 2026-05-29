@@ -29,7 +29,30 @@ public class PaymentRepository : Repository<Payment>, IPaymentRepository
     public async Task<Payment?> GetByTransactionIdAsync(string transactionCode, CancellationToken cancellationToken = default)
     {
         return await _dbSet
+            .Include(p => p.Booking)
+                .ThenInclude(b => b!.BookingItems)
+                    .ThenInclude(i => i.Slot)
             .FirstOrDefaultAsync(p => p.TransactionCode == transactionCode, cancellationToken);
+    }
+
+    public async Task<Payment?> GetByGatewayReferenceAsync(string gateway, string referenceCode, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Include(p => p.Booking)
+            .FirstOrDefaultAsync(p =>
+                p.Gateway == gateway &&
+                p.GatewayReferenceCode == referenceCode,
+                cancellationToken);
+    }
+
+    public async Task<Payment?> GetByGatewayTransactionIdAsync(string gateway, string gatewayTransactionId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Include(p => p.Booking)
+            .FirstOrDefaultAsync(p =>
+                p.Gateway == gateway &&
+                p.GatewayTransactionId == gatewayTransactionId,
+                cancellationToken);
     }
 
     public async Task<IEnumerable<Payment>> GetPaymentsByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default)

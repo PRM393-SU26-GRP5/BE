@@ -54,6 +54,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddScoped<IAmenityRepository, AmenityRepository>();
+        services.AddScoped<IVenueAmenityRepository, VenueAmenityRepository>();
 
         return services;
     }
