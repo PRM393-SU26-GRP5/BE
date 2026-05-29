@@ -24,4 +24,11 @@ public class FootballFieldRepository : Repository<FootballField>, IFootballField
         return await _dbSet
             .FirstOrDefaultAsync(f => f.FieldName == name, cancellationToken);
     }
+
+    public async Task<IEnumerable<FootballField>> GetFieldsByVenueIdAsync(Guid venueId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Where(f => f.VenueId == venueId && !f.IsDeleted)
+            .ToListAsync(cancellationToken);
+    }
 }

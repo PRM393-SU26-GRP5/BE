@@ -54,6 +54,20 @@ public class VenuesController : ControllerBase
         });
     }
 
+    [HttpGet("{id}/fields")]
+    public async Task<IActionResult> GetVenueFields(Guid id)
+    {
+        var result = await _mediator.Send(new GetVenueFieldsQuery(id));
+        
+        return Ok(new
+        {
+            success = true,
+            message = "OK",
+            data = result,
+            errors = Array.Empty<string>()
+        });
+    }
+
     [HttpGet("search")]
     public async Task<IActionResult> SearchVenues([FromQuery] string q, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
