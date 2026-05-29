@@ -49,4 +49,23 @@ public class CloudflareR2StorageService : IStorageService
         var domain = _publicDomain.TrimEnd('/');
         return $"{domain}/{objectKey}";
     }
+
+    public async Task DeleteFileAsync(string fileUrl, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(fileUrl)) return;
+
+        var domain = _publicDomain.TrimEnd('/');
+        if (fileUrl.StartsWith(domain))
+        {
+            var objectKey = fileUrl.Substring(domain.Length).TrimStart('/');
+            
+            var request = new DeleteObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = objectKey
+            };
+
+            await _s3Client.DeleteObjectAsync(request, cancellationToken);
+        }
+    }
 }

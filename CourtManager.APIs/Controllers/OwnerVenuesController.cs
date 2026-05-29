@@ -207,4 +207,40 @@ public class OwnerVenuesController : ControllerBase
             errors = Array.Empty<string>()
         });
     }
+
+    [HttpDelete("{id}/images/{imageId}")]
+    public async Task<IActionResult> DeleteVenueImage(Guid id, Guid imageId)
+    {
+        var ownerIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(ownerIdStr, out var ownerId))
+        {
+            return Unauthorized(new { success = false, message = "Invalid user ID" });
+        }
+
+        try
+        {
+            var command = new CourtManager.Application.Features.Venues.Commands.DeleteVenueImageCommand(id, imageId, ownerId);
+            await _mediator.Send(command);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Image deleted successfully",
+                data = new { },
+                errors = Array.Empty<string>()
+            });
+        }
+        catch (CourtManager.Application.Exceptions.NotFoundException ex)
+        {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (CourtManager.Application.Exceptions.ForbiddenException ex)
+        {
+            return StatusCode(403, new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Failed to delete image", errors = new[] { ex.Message } });
+        }
+    }
 }
