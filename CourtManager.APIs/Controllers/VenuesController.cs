@@ -17,27 +17,8 @@ public class VenuesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetVenues([FromQuery] string? q, [FromQuery] FieldType? fieldType, [FromQuery] string? amenityIds, [FromQuery] double? minRating, [FromQuery] decimal? priceMin, [FromQuery] decimal? priceMax, [FromQuery] string? sort, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetVenues([FromQuery] GetVenuesQuery query)
     {
-        var parsedAmenityIds = new List<Guid>();
-        if (!string.IsNullOrEmpty(amenityIds))
-        {
-            parsedAmenityIds = amenityIds.Split(',').Select(id => Guid.TryParse(id, out var parsedId) ? parsedId : Guid.Empty).Where(id => id != Guid.Empty).ToList();
-        }
-
-        var query = new GetVenuesQuery
-        {
-            Q = q,
-            FieldType = fieldType,
-            AmenityIds = parsedAmenityIds.Any() ? parsedAmenityIds : null,
-            MinRating = minRating,
-            PriceMin = priceMin,
-            PriceMax = priceMax,
-            Sort = sort,
-            Page = page,
-            PageSize = pageSize
-        };
-
         var result = await _mediator.Send(query);
         
         return Ok(new
@@ -57,6 +38,27 @@ public class VenuesController : ControllerBase
             Q = q,
             Page = page,
             PageSize = pageSize
+        };
+
+        var result = await _mediator.Send(query);
+        
+        return Ok(new
+        {
+            success = true,
+            message = "OK",
+            data = result,
+            errors = Array.Empty<string>()
+        });
+    }
+
+    [HttpGet("map/nearby")]
+    public async Task<IActionResult> GetNearbyVenues([FromQuery] double lat, [FromQuery] double lng, [FromQuery] double radius = 5.0)
+    {
+        var query = new GetNearbyVenuesQuery
+        {
+            Latitude = lat,
+            Longitude = lng,
+            RadiusInKm = radius
         };
 
         var result = await _mediator.Send(query);

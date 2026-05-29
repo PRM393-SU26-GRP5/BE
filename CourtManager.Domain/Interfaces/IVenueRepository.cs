@@ -20,4 +20,10 @@ public interface IVenueRepository : IRepository<Venue>
         decimal? priceMax, 
         double? minRating, 
         CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<(Venue Venue, double Distance)>> GetNearbyVenuesAsync(
+        double latitude,
+        double longitude,
+        double radiusInKm,
+        CancellationToken cancellationToken = default);
 }

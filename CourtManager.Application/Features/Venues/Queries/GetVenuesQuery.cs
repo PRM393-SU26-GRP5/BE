@@ -4,16 +4,16 @@ using MediatR;
 
 namespace CourtManager.Application.Features.Venues.Queries;
 
-public class GetVenuesQuery : IRequest<PagedResult<VenueDto>>
+public record GetVenuesQuery : IRequest<PagedResult<VenueDto>>
 {
-    public string? Q { get; set; }
-    public FieldType? FieldType { get; set; }
-    public List<Guid>? AmenityIds { get; set; }
-    public double? MinRating { get; set; }
-    public decimal? PriceMin { get; set; }
-    public decimal? PriceMax { get; set; }
-    public string? Sort { get; set; }
+    public string? Q { get; init; }
+    public FieldType? FieldType { get; init; }
+    public string? AmenityIds { get; init; } // Changed to string to be parsed in Handler
+    public double? MinRating { get; init; }
+    public decimal? PriceMin { get; init; }
+    public decimal? PriceMax { get; init; }
+    public string? Sort { get; init; }
     
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
 }

@@ -18,6 +18,16 @@ public class GetVenuesQueryHandler : IRequestHandler<GetVenuesQuery, PagedResult
 
     public async Task<PagedResult<VenueDto>> Handle(GetVenuesQuery request, CancellationToken cancellationToken)
     {
+        var parsedAmenityIds = new List<Guid>();
+        if (!string.IsNullOrEmpty(request.AmenityIds))
+        {
+            parsedAmenityIds = request.AmenityIds
+                .Split(',')
+                .Select(id => Guid.TryParse(id, out var parsedId) ? parsedId : Guid.Empty)
+                .Where(id => id != Guid.Empty)
+                .ToList();
+        }
+
         var skip = (request.Page - 1) * request.PageSize;
         var take = request.PageSize;
 

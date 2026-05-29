@@ -7,6 +7,7 @@ public class VenueDto
     public string Address { get; set; } = string.Empty;
     public decimal Latitude { get; set; }
     public decimal Longitude { get; set; }
+    public double? Distance { get; set; } // For nearby queries
     public string Description { get; set; } = string.Empty;
     public string OpeningHours { get; set; } = string.Empty;
     public string PhoneContact { get; set; } = string.Empty;
