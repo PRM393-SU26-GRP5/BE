@@ -14,7 +14,7 @@ namespace CourtManager.APIs.Controllers;
 [ApiController]
 [Route("api/v1/slots")]
 [Authorize]
-public class TimeSlotsController : ControllerBase
+public class TimeSlotsController : BaseApiController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<TimeSlotsController> _logger;
@@ -84,14 +84,9 @@ public class TimeSlotsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> LockSlot(Guid id)
     {
-        var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdStr, out var userId))
-        {
-            return Unauthorized(new { success = false, message = "Invalid user ID" });
-        }
-
         try
         {
+            var userId = CurrentUserId;
             var command = new CourtManager.Application.Features.TimeSlots.Commands.LockSlotCommand(id, userId);
             var result = await _mediator.Send(command);
 
@@ -114,6 +109,41 @@ public class TimeSlotsController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(new { success = false, message = "Failed to lock slot", errors = new[] { ex.Message } });
+        }
+    }
+
+    [HttpPost("{id}/unlock")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UnlockSlot(Guid id)
+    {
+        try
+        {
+            var userId = CurrentUserId;
+            var command = new CourtManager.Application.Features.TimeSlots.Commands.UnlockSlotCommand(id, userId);
+            var result = await _mediator.Send(command);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Slot unlocked successfully.",
+                data = new { },
+                errors = Array.Empty<string>()
+            });
+        }
+        catch (CourtManager.Application.Exceptions.NotFoundException ex)
+        {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Failed to unlock slot", errors = new[] { ex.Message } });
         }
     }
 
