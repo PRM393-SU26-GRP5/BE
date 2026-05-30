@@ -16,4 +16,6 @@ public interface IBookingRepository : IRepository<Booking>
     /// Used to block venue deactivation while bookings are still in-flight.
     /// </summary>
     Task<bool> HasActiveBookingsForVenueAsync(Guid venueId, CancellationToken cancellationToken = default);
+
+    Task<bool> IsBookingValidForReviewAsync(Guid bookingId, Guid venueId, Guid userId, CancellationToken cancellationToken = default);
 }

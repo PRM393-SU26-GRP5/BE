@@ -22,14 +22,14 @@ public class ReviewDto
     public string? UserName { get; set; }
 
     /// <summary>
-    /// Foreign key referencing the reviewed football field.
+    /// Foreign key referencing the reviewed venue.
     /// </summary>
-    public Guid FieldId { get; set; }
+    public Guid VenueId { get; set; }
 
     /// <summary>
-    /// Name of the reviewed field (optional).
+    /// Foreign key referencing the booking.
     /// </summary>
-    public string? FieldName { get; set; }
+    public Guid BookingId { get; set; }
 
     /// <summary>
     /// Rating score (typically 1-5).

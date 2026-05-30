@@ -27,4 +27,9 @@ public class ReviewRepository : Repository<Review>, IReviewRepository
     {
         throw new NotImplementedException();
     }
+
+    public async Task<Review?> GetReviewByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.FirstOrDefaultAsync(r => r.BookingId == bookingId && !r.IsDeleted, cancellationToken);
+    }
 }

@@ -24,6 +24,8 @@ public interface IReviewRepository : IRepository<Review>
         Guid fieldId,
         CancellationToken cancellationToken = default);
 
+    Task<Review?> GetReviewByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Calculates the average rating for a field.
     /// </summary>

@@ -42,4 +42,15 @@ public class BookingRepository : Repository<Booking>, IBookingRepository
                 bi.Slot.Field.VenueId == venueId),
             cancellationToken);
     }
+
+    public async Task<bool> IsBookingValidForReviewAsync(Guid bookingId, Guid venueId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _db.Bookings
+            .Where(b => b.Id == bookingId && b.UserId == userId && b.BookingStatus == BookingStatus.Completed && !b.IsDeleted)
+            .AnyAsync(b => b.BookingItems.Any(bi =>
+                bi.Slot != null &&
+                bi.Slot.Field != null &&
+                bi.Slot.Field.VenueId == venueId),
+            cancellationToken);
+    }
 }

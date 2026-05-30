@@ -12,9 +12,9 @@ namespace CourtManager.APIs.Controllers;
 /// Provides CRUD operations for field reviews and ratings.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/reviews")]
 [Authorize]
-public class ReviewsController : ControllerBase
+public class ReviewsController : BaseApiController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ReviewsController> _logger;
@@ -80,25 +80,50 @@ public class ReviewsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
     public IActionResult GetMyReviews()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Fetching reviews for current user {UserId}", userId);
         return Ok(new { message = "Get my reviews endpoint - implementation pending" });
     }
 
     /// <summary>
-    /// Creates a new review for a field.
+    /// Creates a new review for a venue after a completed booking.
     /// </summary>
-    /// <param name="review">The review creation data</param>
+    /// <param name="request">The review creation data</param>
     /// <returns>Created review</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult CreateReview([FromBody] ReviewDto review)
+    public async Task<IActionResult> CreateReview([FromBody] CreateReviewRequestDto request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        _logger.LogInformation("Creating review for field {FieldId} by user {UserId}", review.FieldId, userId);
-        return Ok(new { message = "Create review endpoint - implementation pending" });
+        if (request.Rating < 1 || request.Rating > 5)
+        {
+            return BadRequest(new { success = false, message = "Rating must be between 1 and 5." });
+        }
+
+        try
+        {
+            var command = new CourtManager.Application.Features.Reviews.Commands.CreateReviewCommand(
+                request.VenueId, request.BookingId, request.Rating, request.Comment, CurrentUserId);
+            
+            var result = await _mediator.Send(command);
+
+            return CreatedAtAction(nameof(GetReviewById), new { id = result.ReviewId }, new
+            {
+                success = true,
+                message = "Review created successfully",
+                data = result,
+                errors = Array.Empty<string>()
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Failed to create review", errors = new[] { ex.Message } });
+        }
     }
 
     /// <summary>
