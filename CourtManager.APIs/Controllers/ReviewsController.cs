@@ -138,17 +138,49 @@ public class ReviewsController : BaseApiController
     /// Updates an existing review (Owner only).
     /// </summary>
     /// <param name="id">The review ID</param>
-    /// <param name="review">The updated review data</param>
+    /// <param name="request">The updated review data</param>
     /// <returns>Updated review</returns>
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult UpdateReview(Guid id, [FromBody] ReviewDto review)
+    public async Task<IActionResult> UpdateReview(Guid id, [FromBody] UpdateReviewRequestDto request)
     {
         _logger.LogInformation("Updating review {ReviewId}", id);
-        return Ok(new { message = "Update review endpoint - implementation pending" });
+        
+        if (request.Rating < 1 || request.Rating > 5)
+        {
+            return BadRequest(new { success = false, message = "Rating must be between 1 and 5." });
+        }
+
+        try
+        {
+            var command = new CourtManager.Application.Features.Reviews.Commands.UpdateReviewCommand(
+                id, request.Rating, request.Comment, CurrentUserId);
+
+            var result = await _mediator.Send(command);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Review updated successfully",
+                data = result,
+                errors = Array.Empty<string>()
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = "Failed to update review", errors = new[] { ex.Message } });
+        }
     }
 
     /// <summary>
@@ -158,6 +190,7 @@ public class ReviewsController : BaseApiController
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success status</returns>
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Owner")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
