@@ -27,16 +27,11 @@ public interface IReviewRepository : IRepository<Review>
     Task<Review?> GetReviewByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Calculates the average rating for a field.
+    /// Gets reviews, total count, and average rating for a venue.
     /// </summary>
-    Task<decimal> GetAverageRatingAsync(
-        Guid fieldId,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets total review count for a field.
-    /// </summary>
-    Task<int> GetReviewCountAsync(
-        Guid fieldId,
+    Task<(IEnumerable<Review> Reviews, int TotalCount, decimal AverageRating)> GetVenueReviewsAsync(
+        Guid venueId,
+        int pageNumber,
+        int pageSize,
         CancellationToken cancellationToken = default);
 }

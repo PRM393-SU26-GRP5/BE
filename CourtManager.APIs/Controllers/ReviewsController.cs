@@ -26,20 +26,28 @@ public class ReviewsController : BaseApiController
     }
 
     /// <summary>
-    /// Gets all reviews for a specific field.
+    /// Gets all reviews for a specific venue.
     /// </summary>
-    /// <param name="fieldId">The field ID</param>
-    /// <param name="pageNumber">Page number (default 1)</param>
+    /// <param name="id">The venue ID</param>
+    /// <param name="page">Page number (default 1)</param>
     /// <param name="pageSize">Page size (default 10)</param>
-    /// <returns>Paginated list of reviews</returns>
-    [HttpGet("field/{fieldId}")]
+    /// <returns>Paginated list of reviews and average rating</returns>
+    [HttpGet("venue/{id}")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(IEnumerable<ReviewDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(VenueReviewsResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetReviewsByField(Guid fieldId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetVenueReviews(Guid id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        _logger.LogInformation("Fetching reviews for field {FieldId}", fieldId);
-        return Ok(new { message = "Get reviews by field endpoint - implementation pending" });
+        var query = new CourtManager.Application.Features.Reviews.Queries.GetVenueReviewsQuery(id, page, pageSize);
+        var result = await _mediator.Send(query);
+
+        return Ok(new
+        {
+            success = true,
+            message = "OK",
+            data = result,
+            errors = Array.Empty<string>()
+        });
     }
 
     /// <summary>

@@ -18,14 +18,29 @@ public class ReviewRepository : Repository<Review>, IReviewRepository
         throw new NotImplementedException();
     }
 
-    public async Task<decimal> GetAverageRatingAsync(Guid fieldId, CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<Review> Reviews, int TotalCount, decimal AverageRating)> GetVenueReviewsAsync(
+        Guid venueId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
+        var query = _dbSet.Where(r => r.VenueId == venueId && !r.IsDeleted);
 
-    public async Task<int> GetReviewCountAsync(Guid fieldId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
+        var totalCount = await query.CountAsync(cancellationToken);
+        decimal averageRating = 0;
+        
+        if (totalCount > 0)
+        {
+            // Cast to double for Average calculation, then cast back to decimal
+            var avg = await query.AverageAsync(r => (double)r.Rating, cancellationToken);
+            averageRating = (decimal)Math.Round(avg, 1);
+        }
+
+        var reviews = await query
+            .Include(r => r.User)
+            .OrderByDescending(r => r.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (reviews, totalCount, averageRating);
     }
 
     public async Task<Review?> GetReviewByBookingIdAsync(Guid bookingId, CancellationToken cancellationToken = default)
