@@ -13,9 +13,9 @@ namespace CourtManager.APIs.Controllers;
 /// Provides CRUD operations and query endpoints for bookings.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/bookings")]
 [Authorize]
-public class BookingsController : ControllerBase
+public class BookingsController : BaseApiController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<BookingsController> _logger;
@@ -40,11 +40,7 @@ public class BookingsController : ControllerBase
         [FromBody] CreateBookingCommand command,
         CancellationToken cancellationToken = default)
     {
-        var userIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var currentUserId))
-        {
-            return Unauthorized();
-        }
+        var currentUserId = CurrentUserId;
 
         // Force the command to use the logged-in user's ID
         // (Prevents IDOR: User creating booking for someone else)
@@ -81,7 +77,7 @@ public class BookingsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
 
         // Resource-based Authorization: Only Admin/Manager or the owner can view this booking
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = CurrentUserId.ToString();
         var isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Owner");
 
         if (!isAdminOrManager && result.UserId.ToString() != currentUserId)
@@ -91,6 +87,33 @@ public class BookingsController : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Checks if a booking already has a review.
+    /// </summary>
+    /// <param name="id">The booking ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The review details or null if no review exists</returns>
+    [HttpGet("{id}/review")]
+    [ProducesResponseType(typeof(CourtManager.Application.DTOs.ReviewDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetBookingReview(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Checking review for booking with ID: {BookingId}", id);
+
+        var query = new CourtManager.Application.Features.Reviews.Queries.GetBookingReviewQuery(id);
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return Ok(new
+        {
+            success = true,
+            message = "OK",
+            data = result,
+            errors = Array.Empty<string>()
+        });
     }
 
     /// <summary>

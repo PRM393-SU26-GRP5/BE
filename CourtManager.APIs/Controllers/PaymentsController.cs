@@ -13,7 +13,7 @@ namespace CourtManager.APIs.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class PaymentsController : ControllerBase
+public class PaymentsController : BaseApiController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<PaymentsController> _logger;
@@ -62,7 +62,7 @@ public class PaymentsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
     public IActionResult GetPaymentHistory([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Fetching payment history for user {UserId}", userId);
         return Ok(new { message = "Get payment history endpoint - implementation pending" });
     }
@@ -78,7 +78,7 @@ public class PaymentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult ProcessPayment([FromBody] PaymentDto payment)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Processing payment for booking {BookingId} by user {UserId}", payment.BookingId, userId);
         return Ok(new { message = "Process payment endpoint - implementation pending" });
     }

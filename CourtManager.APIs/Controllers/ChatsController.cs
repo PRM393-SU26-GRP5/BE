@@ -14,7 +14,7 @@ namespace CourtManager.APIs.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ChatsController : ControllerBase
+public class ChatsController : BaseApiController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ChatsController> _logger;
@@ -35,7 +35,7 @@ public class ChatsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<ChatRoomDto>), StatusCodes.Status200OK)]
     public IActionResult GetChatRooms([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Fetching chat rooms for user {UserId}", userId);
         return Ok(new { message = "Get chat rooms endpoint - implementation pending" });
     }
@@ -50,7 +50,7 @@ public class ChatsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetOrCreateChatRoom(Guid otherUserId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Getting or creating chat room between users {UserId} and {OtherUserId}", userId, otherUserId);
         return Ok(new { message = "Get or create chat room endpoint - implementation pending" });
     }
@@ -84,7 +84,7 @@ public class ChatsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult SendMessage(Guid roomId, [FromBody] MessageDto message)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Sending message to room {RoomId} from user {UserId}", roomId, userId);
         return Ok(new { message = "Send message endpoint - implementation pending" });
     }

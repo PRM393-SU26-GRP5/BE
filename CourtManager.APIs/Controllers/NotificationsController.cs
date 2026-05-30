@@ -14,7 +14,7 @@ namespace CourtManager.APIs.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class NotificationsController : ControllerBase
+public class NotificationsController : BaseApiController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<NotificationsController> _logger;
@@ -36,7 +36,7 @@ public class NotificationsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<NotificationDto>), StatusCodes.Status200OK)]
     public IActionResult GetNotifications([FromQuery] bool unreadOnly = false, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Fetching notifications for user {UserId}", userId);
         return Ok(new { message = "Get notifications endpoint - implementation pending" });
     }
@@ -63,7 +63,7 @@ public class NotificationsController : ControllerBase
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public IActionResult GetUnreadCount()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Fetching unread notification count for user {UserId}", userId);
         return Ok(new { message = "Get unread count endpoint - implementation pending" });
     }
@@ -92,7 +92,7 @@ public class NotificationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult MarkAllAsRead()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = CurrentUserId;
         _logger.LogInformation("Marking all notifications as read for user {UserId}", userId);
         return Ok(new { message = "Mark all as read endpoint - implementation pending" });
     }
