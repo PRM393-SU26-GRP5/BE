@@ -10,7 +10,10 @@ public class TimeSlotRepository : Repository<TimeSlot>, ITimeSlotRepository
 
     public async Task<IEnumerable<TimeSlot>> GetAvailableSlotsAsync(Guid fieldId, DateTime date, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _dbSet
+            .Where(x => x.FieldId == fieldId && !x.IsDeleted && x.StartTime.Date == date.Date)
+            .OrderBy(x => x.StartTime)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<TimeSlot>> GetSlotsByFieldIdAsync(Guid fieldId, CancellationToken cancellationToken = default)

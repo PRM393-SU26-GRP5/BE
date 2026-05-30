@@ -11,7 +11,7 @@ namespace CourtManager.APIs.Controllers;
 /// Provides CRUD operations and query endpoints for time slots.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/slots")]
 [Authorize]
 public class TimeSlotsController : ControllerBase
 {
@@ -62,10 +62,18 @@ public class TimeSlotsController : ControllerBase
     [HttpGet("available")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<TimeSlotDto>), StatusCodes.Status200OK)]
-    public IActionResult GetAvailableSlots([FromQuery] Guid fieldId, [FromQuery] DateTime date)
+    public async Task<IActionResult> GetAvailableSlots([FromQuery] Guid fieldId, [FromQuery] DateTime date)
     {
-        _logger.LogInformation("Fetching available slots for field {FieldId} on {Date}", fieldId, date);
-        return Ok(new { message = "Get available slots endpoint - implementation pending" });
+        var query = new CourtManager.Application.Features.TimeSlots.Queries.GetAvailableSlotsQuery(fieldId, date);
+        var result = await _mediator.Send(query);
+
+        return Ok(new
+        {
+            success = true,
+            message = "OK",
+            data = result,
+            errors = Array.Empty<string>()
+        });
     }
 
     /// <summary>
